@@ -1,0 +1,542 @@
+/* ==========================================================================
+   Restoration Calculator – Application Styles
+   Clean, professional form layout for consultant-facing data entry.
+   ========================================================================== */
+
+/* --- Layout ------------------------------------------------------------ */
+
+.app {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 1.5rem;
+  font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+  color: #1a1a2e;
+}
+
+.app-header {
+  text-align: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #e0e7ef;
+}
+
+.app-header h1 {
+  font-size: 1.8rem;
+  color: #16623b;
+  margin: 0 0 0.25rem;
+}
+
+.app-subtitle {
+  color: #666;
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+.app-layout {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: 2rem;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .app-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.app-main {
+  min-width: 0;
+}
+
+.app-sidebar {
+  position: sticky;
+  top: 1rem;
+}
+
+/* --- Collapsible Sections ---------------------------------------------- */
+
+.collapsible-section {
+  background: #fff;
+  border: 1px solid #dde3ea;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.85rem 1rem;
+  background: #f7f9fb;
+  border: none;
+  border-radius: 8px 8px 0 0;
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+}
+
+.section-header:hover {
+  background: #eef2f6;
+}
+
+.section-toggle-icon {
+  color: #888;
+  flex-shrink: 0;
+}
+
+.section-title {
+  font-size: 1.05rem;
+  font-weight: 600;
+  margin: 0;
+  color: #16623b;
+}
+
+.section-subtitle {
+  font-size: 0.8rem;
+  color: #888;
+  margin: 0.1rem 0 0;
+}
+
+.section-body {
+  padding: 1rem 1.25rem 1.25rem;
+}
+
+/* --- Form Grid --------------------------------------------------------- */
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem 1.25rem;
+}
+
+.form-grid--3 {
+  grid-template-columns: 1fr 1fr 1fr;
+}
+
+@media (max-width: 640px) {
+  .form-grid,
+  .form-grid--3 {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* --- Form Fields ------------------------------------------------------- */
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.form-label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.form-unit {
+  font-weight: 400;
+  color: #888;
+}
+
+.form-input {
+  padding: 0.5rem 0.65rem;
+  border: 1px solid #cdd5de;
+  border-radius: 5px;
+  font-size: 0.9rem;
+  background: #fff;
+  transition: border-color 0.15s;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: #16623b;
+  box-shadow: 0 0 0 2px rgba(22, 98, 59, 0.12);
+}
+
+.form-input--error {
+  border-color: #d9534f;
+}
+
+.form-error {
+  font-size: 0.75rem;
+  color: #d9534f;
+  min-height: 1rem;
+}
+
+.form-error--block {
+  display: block;
+  margin: 0.5rem 0;
+  padding: 0.4rem 0.6rem;
+  background: #fdf0f0;
+  border-radius: 4px;
+}
+
+.form-hint {
+  font-size: 0.82rem;
+  color: #666;
+  margin: 0 0 0.75rem;
+  line-height: 1.5;
+}
+
+.form-empty {
+  font-size: 0.85rem;
+  color: #999;
+  font-style: italic;
+  padding: 0.5rem 0;
+}
+
+/* --- Subsection titles ------------------------------------------------- */
+
+.subsection-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #444;
+  margin: 1rem 0 0.5rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid #eee;
+}
+
+/* --- Assistance Cards -------------------------------------------------- */
+
+.assistance-card {
+  border: 1px solid #e0e7ef;
+  border-radius: 6px;
+  padding: 0.85rem 1rem;
+  margin-bottom: 0.75rem;
+  background: #fcfcfd;
+}
+
+.assistance-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.assistance-card-header h4 {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #16623b;
+}
+
+/* --- Buttons ----------------------------------------------------------- */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 1rem;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s, box-shadow 0.15s;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn--primary {
+  background: #2563eb;
+  color: #fff;
+}
+.btn--primary:hover:not(:disabled) {
+  background: #1d4ed8;
+}
+
+.btn--success {
+  background: #16623b;
+  color: #fff;
+}
+.btn--success:hover:not(:disabled) {
+  background: #0f4d2e;
+}
+
+.btn--secondary {
+  background: #f0f2f5;
+  color: #333;
+  border-color: #cdd5de;
+}
+.btn--secondary:hover:not(:disabled) {
+  background: #e4e8ec;
+}
+
+.btn--danger {
+  background: transparent;
+  color: #d9534f;
+  border-color: #d9534f;
+}
+.btn--danger:hover:not(:disabled) {
+  background: #fdf0f0;
+}
+
+.btn--icon {
+  padding: 0.35rem;
+}
+
+.btn--small {
+  padding: 0.3rem 0.6rem;
+  font-size: 0.78rem;
+}
+
+/* --- Form Actions ------------------------------------------------------ */
+
+.form-actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background: #f7f9fb;
+  border-radius: 8px;
+  border: 1px solid #e0e7ef;
+}
+
+/* --- Reconciliation Panel ---------------------------------------------- */
+
+.reconciliation-panel {
+  margin-top: 1rem;
+  padding: 0.85rem 1rem;
+  border-radius: 6px;
+  border: 1px solid #dde3ea;
+}
+
+.reconciliation--ok {
+  background: #f0faf4;
+  border-color: #b2dfcc;
+}
+
+.reconciliation--warn {
+  background: #fffbf0;
+  border-color: #f0d080;
+}
+
+.reconciliation-panel h4 {
+  margin: 0 0 0.5rem;
+  font-size: 0.9rem;
+}
+
+.reconciliation-table {
+  width: 100%;
+  font-size: 0.85rem;
+  border-collapse: collapse;
+}
+
+.reconciliation-table td {
+  padding: 0.3rem 0;
+}
+
+.reconciliation-table td:first-child {
+  font-weight: 500;
+  color: #444;
+}
+
+.reconciliation-table td:last-child {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.status-ok {
+  color: #16623b;
+  font-weight: 600;
+}
+
+.status-warn {
+  color: #c87a1a;
+  font-weight: 600;
+}
+
+/* --- Summary section --------------------------------------------------- */
+
+.summary-block {
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid #eee;
+}
+
+.summary-block:last-child {
+  border-bottom: none;
+}
+
+.summary-block h4 {
+  font-size: 0.9rem;
+  color: #16623b;
+  margin: 0 0 0.5rem;
+}
+
+.summary-dl {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: 0.2rem 1rem;
+  font-size: 0.85rem;
+}
+
+.summary-dl dt {
+  font-weight: 500;
+  color: #555;
+}
+
+.summary-dl dd {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.summary-table {
+  width: 100%;
+  font-size: 0.85rem;
+  border-collapse: collapse;
+  margin-top: 0.25rem;
+}
+
+.summary-table th,
+.summary-table td {
+  text-align: left;
+  padding: 0.35rem 0.5rem;
+  border-bottom: 1px solid #eee;
+}
+
+.summary-table th {
+  font-weight: 600;
+  color: #555;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.summary-table-total td {
+  border-top: 2px solid #ccc;
+  border-bottom: none;
+}
+
+/* --- Saved Models Panel ------------------------------------------------ */
+
+/* --- Checkbox Grid (assistance selection) ------------------------------ */
+
+.checkbox-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem 1.25rem;
+  margin: 0.5rem 0;
+}
+
+@media (max-width: 640px) {
+  .checkbox-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.88rem;
+  cursor: pointer;
+  padding: 0.35rem 0.5rem;
+  border-radius: 4px;
+  transition: background 0.12s;
+}
+
+.checkbox-label:hover {
+  background: #f0f4f8;
+}
+
+.checkbox-label input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: #16623b;
+}
+
+/* --- Form Hint List ---------------------------------------------------- */
+
+.form-hint-list {
+  font-size: 0.82rem;
+  color: #666;
+  line-height: 1.55;
+  margin: 0 0 0.75rem;
+  padding-left: 1.25rem;
+}
+
+.form-hint-list li {
+  margin-bottom: 0.35rem;
+}
+
+/* --- Factor Shares Rows ------------------------------------------------ */
+
+.factor-shares-row {
+  margin-bottom: 1rem;
+  padding: 0.75rem;
+  background: #fcfcfd;
+  border: 1px solid #e8ecf0;
+  border-radius: 6px;
+}
+
+.factor-shares-label {
+  margin: 0 0 0.5rem;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #16623b;
+}
+
+/* --- Saved Models Panel ------------------------------------------------ */
+
+.saved-panel {
+  background: #fff;
+  border: 1px solid #dde3ea;
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+.saved-panel h3 {
+  font-size: 0.95rem;
+  color: #16623b;
+  margin: 0 0 0.75rem;
+}
+
+.saved-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.saved-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #eee;
+  gap: 0.5rem;
+}
+
+.saved-item:last-child {
+  border-bottom: none;
+}
+
+.saved-item-info {
+  display: flex;
+  flex-direction: column;
+  font-size: 0.82rem;
+  min-width: 0;
+}
+
+.saved-item-info strong {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.saved-item-date {
+  color: #999;
+  font-size: 0.72rem;
+}
+
+.saved-item-actions {
+  display: flex;
+  gap: 0.3rem;
+  flex-shrink: 0;
+}
