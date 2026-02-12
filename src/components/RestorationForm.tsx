@@ -21,6 +21,7 @@ import {
   IdentificationSection,
   ContextSection,
   CostEstimatesSection,
+  LaborBreakdownSection,
   SummaryValidationSection,
 } from "./sections";
 import { ExportButton } from "./ExportButton";
@@ -59,6 +60,7 @@ export function RestorationForm({ initialData, onSaved }: Props) {
         <IdentificationSection />
         <ContextSection />
         <CostEstimatesSection />
+        <LaborBreakdownSection />
         <SummaryValidationSection values={values} computed={computed} />
 
         {/* Action bar */}

@@ -177,6 +177,24 @@ export const restorationModelSchema = z.object({
 
   // Factor Shares (favorable base)
   favorableFactorShares: factorSharesSchema,
+
+  // Labor Breakdown (hired vs family)
+  laborBreakdown: z.object({
+    implementation: z.object({
+      hiredLabor: z.number({ message: "Hired Labor % is required" }).min(0, "Cannot be negative").max(100, "Cannot exceed 100%"),
+      familyLabor: z.number({ message: "Family Labor % is required" }).min(0, "Cannot be negative").max(100, "Cannot exceed 100%"),
+    }).refine((d) => Math.abs(d.hiredLabor + d.familyLabor - 100) < 0.01, {
+      message: "Hired + Family labor must sum to 100%",
+      path: ["hiredLabor"],
+    }),
+    maintenance: z.object({
+      hiredLabor: z.number({ message: "Hired Labor % is required" }).min(0, "Cannot be negative").max(100, "Cannot exceed 100%"),
+      familyLabor: z.number({ message: "Family Labor % is required" }).min(0, "Cannot be negative").max(100, "Cannot exceed 100%"),
+    }).refine((d) => Math.abs(d.hiredLabor + d.familyLabor - 100) < 0.01, {
+      message: "Hired + Family labor must sum to 100%",
+      path: ["hiredLabor"],
+    }),
+  }),
 });
 
 // ---------------------------------------------------------------------------

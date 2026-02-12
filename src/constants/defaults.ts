@@ -189,4 +189,8 @@ export const DEFAULT_FORM_VALUES: RestorationModelFormData = {
   assistanceCosts: [],
   interactionAdjustment: 0,
   favorableFactorShares: { ...EMPTY_FACTOR_SHARES },
+  laborBreakdown: {
+    implementation: { hiredLabor: 0, familyLabor: 0 },
+    maintenance: { hiredLabor: 0, familyLabor: 0 },
+  },
 };

@@ -223,6 +223,33 @@ export interface RestorationModel {
   // ---- Factor Shares ----
   /** Factor shares for the favorable base cost */
   favorableFactorShares: FactorShares;
+
+  // ---- Labor Breakdown ----
+  /** Breakdown of labor hours into hired vs family labor (must sum to 100% each) */
+  laborBreakdown: LaborBreakdown;
+}
+
+// ---------------------------------------------------------------------------
+// Labor Breakdown (Hired vs Family)
+// ---------------------------------------------------------------------------
+
+/**
+ * Captures what proportion of total labor hours corresponds to hired labor
+ * versus family labor, separately for implementation and maintenance phases.
+ * Each phase's hiredLabor + familyLabor must sum to 100%.
+ */
+export interface LaborPhaseBreakdown {
+  /** Percentage of labor hours from hired workers (0–100) */
+  hiredLabor: number;
+  /** Percentage of labor hours from family members (0–100) */
+  familyLabor: number;
+}
+
+export interface LaborBreakdown {
+  /** Hired vs family labor split for implementation phase (Year 1) */
+  implementation: LaborPhaseBreakdown;
+  /** Hired vs family labor split for maintenance phase (Years 2–T) */
+  maintenance: LaborPhaseBreakdown;
 }
 
 // ---------------------------------------------------------------------------
