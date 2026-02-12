@@ -8,7 +8,7 @@
 import { useFormContext } from "react-hook-form";
 import type { RestorationModelFormData } from "../../schemas";
 import { CollapsibleSection, FormField, FormSelect } from "../ui";
-import { ECOSYSTEM_OPTIONS, METHOD_OPTIONS } from "../../constants";
+import { ECOSYSTEM_OPTIONS } from "../../constants";
 
 export function IdentificationSection() {
   const {
@@ -23,7 +23,8 @@ export function IdentificationSection() {
     >
       <p className="form-hint">
         Each model specification applies to one <strong>ecosystem × restoration method</strong>{" "}
-        combination. Please identify the project below.
+        combination. Please identify the project below. The restoration method will be
+        selected in the next section.
       </p>
 
       <div className="form-grid">
@@ -41,25 +42,11 @@ export function IdentificationSection() {
           registration={register("country")}
           error={errors.country}
         />
-
-        <FormSelect
-          label="Restoration Method"
-          options={METHOD_OPTIONS}
-          placeholder="Select method…"
-          registration={register("method")}
-          error={errors.method}
-        />
-
-        <FormField
-          label="Time Horizon"
-          unit="years"
-          type="number"
-          min="1"
-          step="1"
-          registration={register("timeHorizon", { valueAsNumber: true })}
-          error={errors.timeHorizon}
-        />
       </div>
+
+      <p className="form-hint" style={{ marginTop: "0.75rem" }}>
+        <strong>Time horizon:</strong> 20 years (fixed for all models).
+      </p>
     </CollapsibleSection>
   );
 }

@@ -68,16 +68,71 @@ export const scenarioCostsSchema = z
   );
 
 // ---------------------------------------------------------------------------
+// Cost Distribution (reuses factor-shares structure)
+// ---------------------------------------------------------------------------
+
+/** Cost distribution across labor / machinery / materials — must sum to 100%. */
+export const costDistributionSchema = z
+  .object({
+    labor: z
+      .number({ message: "Labor % is required" })
+      .min(0, "Cannot be negative")
+      .max(100, "Cannot exceed 100%"),
+    materials: z
+      .number({ message: "Materials % is required" })
+      .min(0, "Cannot be negative")
+      .max(100, "Cannot exceed 100%"),
+    machinery: z
+      .number({ message: "Machinery % is required" })
+      .min(0, "Cannot be negative")
+      .max(100, "Cannot exceed 100%"),
+  })
+  .refine((d) => Math.abs(d.labor + d.materials + d.machinery - 100) < 0.01, {
+    message: "Distribution must sum to 100%",
+    path: ["labor"],
+  });
+
+// ---------------------------------------------------------------------------
 // Context Variables
 // ---------------------------------------------------------------------------
 
+/** A single context constraint entry with cost, phase checkboxes, and distribution. */
+export const contextConstraintEntrySchema = z.object({
+  cost: z
+    .number({ message: "Cost is required" })
+    .min(0, "Cannot be negative"),
+  appliesToImplementation: z.boolean().default(false),
+  appliesToMaintenance: z.boolean().default(false),
+  distribution: costDistributionSchema,
+});
+
 export const contextVariablesSchema = z.object({
-  fireRisk: z.enum(["low", "medium", "high"]),
-  soilDegradation: z.enum(["none", "moderate", "severe"]),
-  grazingPressure: z.enum(["low", "medium", "high"]),
-  invasiveSpeciesPressure: z.enum(["low", "medium", "high"]),
-  humanEncroachment: z.enum(["low", "medium", "high"]),
-  seedAvailabilityConstraint: z.enum(["yes", "no"]),
+  fireRisk: contextConstraintEntrySchema,
+  grazingPressure: contextConstraintEntrySchema,
+  invasiveSpeciesPressure: contextConstraintEntrySchema,
+  humanEncroachment: contextConstraintEntrySchema,
+});
+
+// ---------------------------------------------------------------------------
+// Per-Method Baseline Cost Entry
+// ---------------------------------------------------------------------------
+
+export const methodCostEntrySchema = z.object({
+  implementationCost: z
+    .number({ message: "Implementation cost is required" })
+    .min(0, "Cannot be negative"),
+  implementationDistribution: costDistributionSchema,
+  maintenanceCost: z
+    .number({ message: "Maintenance cost is required" })
+    .min(0, "Cannot be negative"),
+  maintenanceDistribution: costDistributionSchema,
+});
+
+export const methodCostsSchema = z.object({
+  natural_regeneration: methodCostEntrySchema,
+  anr_30: methodCostEntrySchema,
+  seed_dispersal: methodCostEntrySchema,
+  seedling_planting: methodCostEntrySchema,
 });
 
 // ---------------------------------------------------------------------------
@@ -101,12 +156,12 @@ export const restorationModelSchema = z.object({
   // Identification
   ecosystem: z.string().min(1, "Ecosystem is required"),
   country: z.string().min(1, "Country is required"),
-  method: z.string().min(1, "Restoration method is required"),
-  timeHorizon: z
-    .number({ message: "Time horizon is required" })
-    .int("Must be a whole number")
-    .min(1, "Must be at least 1 year")
-    .max(100, "Must be ≤ 100 years"),
+  timeHorizon: z.literal(20).default(20),
+
+  // Restoration Method (tab-based)
+  methodType: z.enum(["natural_regeneration", "anr_30", "seed_dispersal", "seedling_planting"]),
+  enrichmentIntensity: z.number().min(0, "Cannot be negative").max(100, "Cannot exceed 100%"),
+  methodCosts: methodCostsSchema,
 
   // Context & Scenario Definition
   contextVariables: contextVariablesSchema,

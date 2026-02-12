@@ -8,6 +8,7 @@
 import { Download } from "lucide-react";
 import type { RestorationModelFormData } from "../schemas";
 import { exportToJsonFile, generateExportFilename } from "../utils";
+import { getMethodLabel } from "../constants";
 
 interface Props {
   data: RestorationModelFormData;
@@ -16,7 +17,7 @@ interface Props {
 
 export function ExportButton({ data, disabled }: Props) {
   const handleExport = () => {
-    const filename = generateExportFilename(data.ecosystem, data.method);
+    const filename = generateExportFilename(data.ecosystem, getMethodLabel(data.methodType));
     exportToJsonFile(data, filename);
   };
 

@@ -3,11 +3,9 @@
  *
  * Narrative flow:
  *   1. Identification (ecosystem, country, method, time horizon)
- *   2. Context & Scenario Definition (context variables + assistance selection)
- *   3. Cost Estimates (favorable + unfavorable aggregate costs)
- *   4. Assistance Cost Breakdown (per-activity costs + reconciliation)
- *   5. Factor of Production Shares (base + each assistance)
- *   6. Summary & Validation
+ *   2. Method Costs (4 tabs with implementation + maintenance costs & distributions)
+ *   3. Additional Context Variables & Constraints
+ *   4. Summary & Validation
  */
 
 import { FormProvider } from "react-hook-form";
@@ -17,13 +15,12 @@ import { useComputedFields } from "../hooks/useComputedFields";
 import type { RestorationModelFormData } from "../schemas";
 import type { RestorationModel } from "../types";
 import { saveModel } from "../utils/storage";
+import { allMethodTabsComplete } from "../utils/computations";
 
 import {
   IdentificationSection,
   ContextSection,
   CostEstimatesSection,
-  AssistanceDetailSection,
-  FactorSharesSection,
   SummaryValidationSection,
 } from "./sections";
 import { ExportButton } from "./ExportButton";
@@ -43,7 +40,13 @@ export function RestorationForm({ initialData, onSaved }: Props) {
   const values = watch();
   const computed = useComputedFields(values);
 
+  const methodsComplete = allMethodTabsComplete(values.methodCosts as any);
+
   const onSubmit = (data: RestorationModelFormData) => {
+    if (!allMethodTabsComplete(data.methodCosts as any)) {
+      alert("Please fill in the implementation and maintenance costs for all four method tabs before saving.");
+      return;
+    }
     // Save to local storage (mock persistence)
     saveModel(data as RestorationModel);
     alert("Model saved successfully!");
@@ -56,16 +59,20 @@ export function RestorationForm({ initialData, onSaved }: Props) {
         <IdentificationSection />
         <ContextSection />
         <CostEstimatesSection />
-        <AssistanceDetailSection computed={computed} />
-        <FactorSharesSection />
         <SummaryValidationSection values={values} computed={computed} />
 
         {/* Action bar */}
         <div className="form-actions">
-          <button type="submit" className="btn btn--success">
+          {!methodsComplete && (
+            <p className="form-warning" style={{ gridColumn: "1 / -1", margin: "0 0 0.5rem" }}>
+              ⚠ Please complete the implementation and maintenance costs in all four
+              method tabs before saving or exporting.
+            </p>
+          )}
+          <button type="submit" className="btn btn--success" disabled={!methodsComplete}>
             <Save size={16} /> Save Model
           </button>
-          <ExportButton data={values} />
+          <ExportButton data={values} disabled={!methodsComplete} />
           <button
             type="button"
             className="btn btn--secondary"

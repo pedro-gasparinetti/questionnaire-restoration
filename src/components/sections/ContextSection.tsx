@@ -1,40 +1,24 @@
 /**
  * ContextSection
  *
- * Guides the consultant through defining the local context for the
- * restoration site. The context determines what a "favorable" vs
- * "unfavorable" scenario looks like for this region.
+ * Step 1: Tab-based restoration method selection — defines the baseline
+ * ecological scenario and enrichment intensity.
  *
- * The favorable scenario = best-case conditions, no extra assistance needed.
- * The unfavorable scenario = realistic worst-case for the region, where
- * specific assistance activities are required to achieve the same ecological
- * outcome.
+ * Step 2: Additional context variables (fire, grazing, invasive species,
+ * encroachment) that drive assistance activity selection.
  *
- * After setting context, the consultant selects which specific assistance
- * activities would be needed in the unfavorable scenario.
+ * Step 3: Assistance activity selection checkboxes.
+ *
+ * This component only defines the baseline ecological method and enrichment
+ * intensity. Assistance cost packages are NOT implemented here.
  */
 
+import { useState, useEffect } from "react";
 import { useFormContext } from "react-hook-form";
 import type { RestorationModelFormData } from "../../schemas";
-import { CollapsibleSection, FormSelect } from "../ui";
-import { ASSISTANCE_TYPES } from "../../constants";
-
-const SEVERITY_OPTIONS = [
-  { value: "low", label: "Low" },
-  { value: "medium", label: "Medium" },
-  { value: "high", label: "High" },
-];
-
-const SOIL_OPTIONS = [
-  { value: "none", label: "None" },
-  { value: "moderate", label: "Moderate" },
-  { value: "severe", label: "Severe" },
-];
-
-const BINARY_OPTIONS = [
-  { value: "no", label: "No" },
-  { value: "yes", label: "Yes" },
-];
+import { CollapsibleSection, FormField, InfoBox } from "../ui";
+import { METHOD_TABS } from "../../constants";
+import type { MethodType } from "../../types";
 
 export function ContextSection() {
   const {
@@ -44,111 +28,260 @@ export function ContextSection() {
     formState: { errors },
   } = useFormContext<RestorationModelFormData>();
 
-  const ctxErrors = errors.contextVariables;
-  const selectedAssistances = watch("selectedAssistances") || [];
+  const currentMethodType = watch("methodType") || "natural_regeneration";
+  const currentEnrichment = watch("enrichmentIntensity");
+  const methodCosts = watch("methodCosts");
 
-  const handleAssistanceToggle = (id: string) => {
-    const current = selectedAssistances;
-    const updated = current.includes(id)
-      ? current.filter((a: string) => a !== id)
-      : [...current, id];
-    setValue("selectedAssistances", updated, { shouldDirty: true });
+  const [activeTab, setActiveTab] = useState<MethodType>(currentMethodType);
+
+  const activeTabData = METHOD_TABS.find((t) => t.id === activeTab) || METHOD_TABS[0];
+
+  // Watch individual distribution fields so React re-renders on every keystroke
+  const implLabor   = watch(`methodCosts.${activeTab}.implementationDistribution.labor`);
+  const implMach    = watch(`methodCosts.${activeTab}.implementationDistribution.machinery`);
+  const implMat     = watch(`methodCosts.${activeTab}.implementationDistribution.materials`);
+  const maintLabor  = watch(`methodCosts.${activeTab}.maintenanceDistribution.labor`);
+  const maintMach   = watch(`methodCosts.${activeTab}.maintenanceDistribution.machinery`);
+  const maintMat    = watch(`methodCosts.${activeTab}.maintenanceDistribution.materials`);
+
+  const implSum  = (Number(implLabor) || 0) + (Number(implMach) || 0) + (Number(implMat) || 0);
+  const maintSum = (Number(maintLabor) || 0) + (Number(maintMach) || 0) + (Number(maintMat) || 0);
+
+  const isImplDistFilled  = (Number(implLabor) || 0) > 0 || (Number(implMach) || 0) > 0 || (Number(implMat) || 0) > 0;
+  const isMaintDistFilled = (Number(maintLabor) || 0) > 0 || (Number(maintMach) || 0) > 0 || (Number(maintMat) || 0) > 0;
+
+  // When tab changes, update form state
+  const handleTabChange = (tabId: MethodType) => {
+    setActiveTab(tabId);
+    const tab = METHOD_TABS.find((t) => t.id === tabId)!;
+    setValue("methodType", tabId, { shouldDirty: true });
+    setValue("enrichmentIntensity", tab.defaultEnrichment, { shouldDirty: true });
+  };
+
+  // Sync active tab with form state on initial render
+  useEffect(() => {
+    if (currentMethodType !== activeTab) {
+      setActiveTab(currentMethodType);
+    }
+  }, [currentMethodType]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Enrichment warning for ANR tab
+  const showEnrichmentWarning =
+    activeTab === "anr_30" && currentEnrichment > 50;
+
+  // Check if a tab's costs have been filled (both > 0) and distributions sum to 100%
+  const isTabComplete = (tabId: string): boolean => {
+    const costs = methodCosts?.[tabId as MethodType];
+    if (!costs) return false;
+    if (costs.implementationCost <= 0 || costs.maintenanceCost <= 0) return false;
+    const id = costs.implementationDistribution;
+    const md = costs.maintenanceDistribution;
+    if (!id || !md) return false;
+    const iSum = (Number(id.labor) || 0) + (Number(id.machinery) || 0) + (Number(id.materials) || 0);
+    const mSum = (Number(md.labor) || 0) + (Number(md.machinery) || 0) + (Number(md.materials) || 0);
+    return Math.abs(iSum - 100) < 0.01 && Math.abs(mSum - 100) < 0.01;
   };
 
   return (
     <CollapsibleSection
       title="2. Context & Scenario Definition"
-      subtitle="Define the local conditions and what an unfavorable scenario looks like"
+      subtitle="Define the restoration method and local conditions"
     >
+      {/* ── Restoration Method Tabs ────────────────────────────── */}
       <p className="form-hint">
-        We need to understand the local conditions of the restoration site. This will
-        help define two contrasting scenarios:
+        We define the restoration method initially based on <strong>soil condition</strong>{" "}
+        and <strong>propagule availability</strong>.
       </p>
-      <ul className="form-hint-list">
-        <li>
-          <strong>Favorable scenario:</strong> Best-case conditions for restoration in
-          this region. No additional assistance activities are needed beyond the standard
-          restoration method.
-        </li>
-        <li>
-          <strong>Unfavorable scenario:</strong> A plausible worst-case for this region,
-          where contextual challenges require specific additional assistance activities
-          to achieve the same ecological outcome.
-        </li>
-      </ul>
-
-      <h3 className="subsection-title">Local Context Conditions</h3>
-      <p className="form-hint">
-        For each factor below, select the level that best describes the <strong>unfavorable
-        scenario</strong> you have in mind for this region.
+      <p className="form-hint" style={{ fontStyle: "italic", marginBottom: "1rem" }}>
+        Please fill in the cost parameters for <strong>all four</strong> scenario tabs below.
+        Each tab must be completed before you can save or export the results.
       </p>
 
-      <div className="form-grid form-grid--3">
-        <FormSelect
-          label="Fire Risk"
-          options={SEVERITY_OPTIONS}
-          registration={register("contextVariables.fireRisk")}
-          error={ctxErrors?.fireRisk}
-        />
-        <FormSelect
-          label="Soil Degradation"
-          options={SOIL_OPTIONS}
-          registration={register("contextVariables.soilDegradation")}
-          error={ctxErrors?.soilDegradation}
-        />
-        <FormSelect
-          label="Grazing Pressure"
-          options={SEVERITY_OPTIONS}
-          registration={register("contextVariables.grazingPressure")}
-          error={ctxErrors?.grazingPressure}
-        />
-        <FormSelect
-          label="Invasive Species Pressure"
-          options={SEVERITY_OPTIONS}
-          registration={register("contextVariables.invasiveSpeciesPressure")}
-          error={ctxErrors?.invasiveSpeciesPressure}
-        />
-        <FormSelect
-          label="Human Encroachment"
-          options={SEVERITY_OPTIONS}
-          registration={register("contextVariables.humanEncroachment")}
-          error={ctxErrors?.humanEncroachment}
-        />
-        <FormSelect
-          label="Seed Availability Constraint"
-          options={BINARY_OPTIONS}
-          registration={register("contextVariables.seedAvailabilityConstraint")}
-          error={ctxErrors?.seedAvailabilityConstraint}
-        />
-      </div>
+      <div className="method-tabs">
+        <div className="method-tabs-header">
+          {METHOD_TABS.map((tab) => (
+            <button
+              key={tab.id}
+              type="button"
+              className={`method-tab ${activeTab === tab.id ? "method-tab--active" : ""}`}
+              onClick={() => handleTabChange(tab.id)}
+            >
+              {tab.title}
+              {isTabComplete(tab.id) ? (
+                <span className="tab-badge tab-badge--done" title="Completed">✓</span>
+              ) : (
+                <span className="tab-badge tab-badge--pending" title="Pending">○</span>
+              )}
+            </button>
+          ))}
+        </div>
 
-      <h3 className="subsection-title">Required Assistance Activities</h3>
-      <p className="form-hint">
-        Given the unfavorable context described above, which of the following assistance
-        activities would be <strong>required</strong> to achieve the same restoration
-        outcome? Select all that apply.
-      </p>
+        <div className="method-tab-content" key={activeTab}>
+          <div className="method-info-box">
+            {activeTabData.description.split("\n").map((line, i) => (
+              <p key={i}>{line}</p>
+            ))}
+          </div>
 
-      <div className="checkbox-grid">
-        {ASSISTANCE_TYPES.map((type) => (
-          <label key={type.id} className="checkbox-label">
-            <input
-              type="checkbox"
-              checked={selectedAssistances.includes(type.id)}
-              onChange={() => handleAssistanceToggle(type.id)}
+          {/* ── Basic Implementation Costs ───────────────────────── */}
+          <h4 style={{ marginTop: "1.25rem", marginBottom: "0.5rem" }}>Basic Implementation Costs (Year 1)</h4>
+          <InfoBox
+            title="What to include"
+            text={activeTabData.implementationCostInfo}
+          />
+          <div style={{ maxWidth: "320px", marginTop: "0.75rem" }}>
+            <FormField
+              label="Implementation Cost"
+              unit="US$/ha"
+              type="number"
+              min="0"
+              step="0.01"
+              registration={register(`methodCosts.${activeTab}.implementationCost`, {
+                valueAsNumber: true,
+              })}
+              error={errors.methodCosts?.[activeTab]?.implementationCost}
             />
-            <span>{type.label}</span>
-          </label>
-        ))}
-      </div>
+          </div>
 
-      {selectedAssistances.length > 0 && (
-        <p className="form-hint" style={{ marginTop: "0.75rem" }}>
-          <strong>{selectedAssistances.length}</strong> assistance
-          {selectedAssistances.length > 1 ? " activities" : " activity"} selected.
-          You will be asked to detail the cost of each one in the following sections.
-        </p>
-      )}
+          <div className="cost-distribution">
+            <p className="cost-distribution-label">
+              Cost distribution <span className="cost-distribution-hint">(must sum to 100%)</span>
+              {isImplDistFilled && (
+                <span className={`cost-distribution-sum ${Math.abs(implSum - 100) < 0.01 ? "cost-distribution-sum--ok" : "cost-distribution-sum--warn"}`}>
+                  {Math.abs(implSum - 100) < 0.01 ? "✓ 100%" : `Σ = ${implSum.toFixed(0)}%`}
+                </span>
+              )}
+            </p>
+            {!isImplDistFilled && (
+              <p className="cost-distribution-warning">
+                Please fill in the cost distribution for this cost category.
+              </p>
+            )}
+            {isImplDistFilled && Math.abs(implSum - 100) >= 0.01 && (
+              <p className="cost-distribution-warning">
+                The distribution must sum to exactly 100%. Currently: {implSum.toFixed(1)}%.
+              </p>
+            )}
+            <div className="cost-distribution-fields">
+              <FormField
+                label="Labor %"
+                type="number"
+                min="0"
+                max="100"
+                step="1"
+                registration={register(`methodCosts.${activeTab}.implementationDistribution.labor`, {
+                  valueAsNumber: true,
+                })}
+                error={errors.methodCosts?.[activeTab]?.implementationDistribution?.labor}
+              />
+              <FormField
+                label="Machinery %"
+                type="number"
+                min="0"
+                max="100"
+                step="1"
+                registration={register(`methodCosts.${activeTab}.implementationDistribution.machinery`, {
+                  valueAsNumber: true,
+                })}
+                error={errors.methodCosts?.[activeTab]?.implementationDistribution?.machinery}
+              />
+              <FormField
+                label="Materials %"
+                type="number"
+                min="0"
+                max="100"
+                step="1"
+                registration={register(`methodCosts.${activeTab}.implementationDistribution.materials`, {
+                  valueAsNumber: true,
+                })}
+                error={errors.methodCosts?.[activeTab]?.implementationDistribution?.materials}
+              />
+            </div>
+            <p className="cost-distribution-examples">
+              Materials: {activeTabData.implementationMaterialExamples}
+            </p>
+          </div>
+
+          {/* ── Basic Maintenance Costs ────────────────────────── */}
+          <h4 style={{ marginTop: "1.5rem", marginBottom: "0.5rem" }}>Basic Maintenance Costs (Years 2–20)</h4>
+          <InfoBox
+            title="What to include"
+            text={activeTabData.maintenanceCostInfo}
+          />
+          <div style={{ maxWidth: "320px", marginTop: "0.75rem" }}>
+            <FormField
+              label="Maintenance Cost"
+              unit="US$/ha"
+              type="number"
+              min="0"
+              step="0.01"
+              registration={register(`methodCosts.${activeTab}.maintenanceCost`, {
+                valueAsNumber: true,
+              })}
+              error={errors.methodCosts?.[activeTab]?.maintenanceCost}
+            />
+          </div>
+
+          <div className="cost-distribution">
+            <p className="cost-distribution-label">
+              Cost distribution <span className="cost-distribution-hint">(must sum to 100%)</span>
+              {isMaintDistFilled && (
+                <span className={`cost-distribution-sum ${Math.abs(maintSum - 100) < 0.01 ? "cost-distribution-sum--ok" : "cost-distribution-sum--warn"}`}>
+                  {Math.abs(maintSum - 100) < 0.01 ? "✓ 100%" : `Σ = ${maintSum.toFixed(0)}%`}
+                </span>
+              )}
+            </p>
+            {!isMaintDistFilled && (
+              <p className="cost-distribution-warning">
+                Please fill in the cost distribution for this cost category.
+              </p>
+            )}
+            {isMaintDistFilled && Math.abs(maintSum - 100) >= 0.01 && (
+              <p className="cost-distribution-warning">
+                The distribution must sum to exactly 100%. Currently: {maintSum.toFixed(1)}%.
+              </p>
+            )}
+            <div className="cost-distribution-fields">
+              <FormField
+                label="Labor %"
+                type="number"
+                min="0"
+                max="100"
+                step="1"
+                registration={register(`methodCosts.${activeTab}.maintenanceDistribution.labor`, {
+                  valueAsNumber: true,
+                })}
+                error={errors.methodCosts?.[activeTab]?.maintenanceDistribution?.labor}
+              />
+              <FormField
+                label="Machinery %"
+                type="number"
+                min="0"
+                max="100"
+                step="1"
+                registration={register(`methodCosts.${activeTab}.maintenanceDistribution.machinery`, {
+                  valueAsNumber: true,
+                })}
+                error={errors.methodCosts?.[activeTab]?.maintenanceDistribution?.machinery}
+              />
+              <FormField
+                label="Materials %"
+                type="number"
+                min="0"
+                max="100"
+                step="1"
+                registration={register(`methodCosts.${activeTab}.maintenanceDistribution.materials`, {
+                  valueAsNumber: true,
+                })}
+                error={errors.methodCosts?.[activeTab]?.maintenanceDistribution?.materials}
+              />
+            </div>
+            <p className="cost-distribution-examples">
+              Materials: {activeTabData.maintenanceMaterialExamples}
+            </p>
+          </div>
+        </div>
+      </div>
     </CollapsibleSection>
   );
 }

@@ -7,6 +7,7 @@
 import { useState, useEffect } from "react";
 import { Trash2, Upload } from "lucide-react";
 import { loadModels, deleteModel, type SavedModel } from "../utils/storage";
+import { getMethodLabel } from "../constants/defaults";
 import type { RestorationModel } from "../types";
 
 interface Props {
@@ -43,7 +44,7 @@ export function SavedModelsPanel({ onLoad }: Props) {
           <li key={m.id} className="saved-item">
             <div className="saved-item-info">
               <strong>
-                {m.data.ecosystem} — {m.data.method}
+                {m.data.ecosystem} — {getMethodLabel(m.data.methodType)}
               </strong>
               <span className="saved-item-date">
                 {new Date(m.savedAt).toLocaleString()}

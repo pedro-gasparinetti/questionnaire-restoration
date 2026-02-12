@@ -13,8 +13,26 @@
  * =============================================================================
  */
 
-import type { AssistanceCost, ComputedFields, CostBreakdownItem } from "../types";
+import type { AssistanceCost, ComputedFields, CostBreakdownItem, MethodCosts } from "../types";
 import { RECONCILIATION_TOLERANCE } from "../constants";
+
+/**
+ * Check whether all four method tabs have been filled (both costs > 0, both distributions sum to 100%).
+ */
+export function allMethodTabsComplete(methodCosts: MethodCosts | undefined): boolean {
+  if (!methodCosts) return false;
+  const tabs = ["natural_regeneration", "anr_30", "seed_dispersal", "seedling_planting"] as const;
+  return tabs.every((t) => {
+    const entry = methodCosts[t];
+    if (!entry || entry.implementationCost <= 0 || entry.maintenanceCost <= 0) return false;
+    const id = entry.implementationDistribution;
+    const md = entry.maintenanceDistribution;
+    if (!id || !md) return false;
+    const iSum = (Number(id.labor) || 0) + (Number(id.machinery) || 0) + (Number(id.materials) || 0);
+    const mSum = (Number(md.labor) || 0) + (Number(md.machinery) || 0) + (Number(md.materials) || 0);
+    return Math.abs(iSum - 100) < 0.01 && Math.abs(mSum - 100) < 0.01;
+  });
+}
 
 /**
  * Compute the total of all individual assistance costs (US$/ha).

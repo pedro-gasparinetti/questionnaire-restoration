@@ -79,18 +79,75 @@ export type SoilDegradationLevel = "none" | "moderate" | "severe";
 export type BinaryConstraint = "yes" | "no";
 
 /**
+ * A single context constraint entry — captures the estimated cost,
+ * when it is incurred, and how it breaks down across production factors.
+ */
+export interface ContextConstraintEntry {
+  /** Estimated additional cost to address this constraint (US$/ha) */
+  cost: number;
+  /** Whether the cost applies to implementation (Year 1) */
+  appliesToImplementation: boolean;
+  /** Whether the cost applies to maintenance (Years 2–20) */
+  appliesToMaintenance: boolean;
+  /** Factor-of-production distribution (labor / machinery / materials, must sum to 100%) */
+  distribution: FactorShares;
+}
+
+/**
  * Context variables describe the local conditions of the restoration site.
- * They determine which assistance activities are needed in the unfavorable
- * scenario. Context does NOT directly affect carbon — it only drives costs.
+ * Each variable is a full constraint entry with cost, phase, and distribution.
+ * Context does NOT directly affect carbon — it only drives costs.
  */
 export interface ContextVariables {
-  fireRisk: SeverityLevel;
-  soilDegradation: SoilDegradationLevel;
-  grazingPressure: SeverityLevel;
-  invasiveSpeciesPressure: SeverityLevel;
-  humanEncroachment: SeverityLevel;
-  seedAvailabilityConstraint: BinaryConstraint;
+  /** Firebreak / Fire Risk */
+  fireRisk: ContextConstraintEntry;
+  /** Fencing / Grazing Pressure */
+  grazingPressure: ContextConstraintEntry;
+  /** Weed Control / Invasive Species Pressure */
+  invasiveSpeciesPressure: ContextConstraintEntry;
+  /** Monitoring / Human Encroachment */
+  humanEncroachment: ContextConstraintEntry;
 }
+
+// ---------------------------------------------------------------------------
+// Restoration Method Type
+// ---------------------------------------------------------------------------
+
+/**
+ * Each method type corresponds to a baseline ecological scenario
+ * that determines the enrichment intensity and expected soil/propagule conditions.
+ */
+export type MethodType =
+  | "natural_regeneration"
+  | "anr_30"
+  | "seed_dispersal"
+  | "seedling_planting";
+
+// ---------------------------------------------------------------------------
+// Per-Method Baseline Cost Entry
+// ---------------------------------------------------------------------------
+
+/**
+ * Baseline implementation and maintenance costs for a single restoration method.
+ * The consultant fills these for ALL four method tabs.
+ * Each cost also carries a factor-of-production distribution (labor / machinery / materials)
+ * that must sum to 100%.
+ */
+export interface MethodCostEntry {
+  /** Implementation cost — year 1 only (US$/ha) */
+  implementationCost: number;
+  /** Factor-of-production distribution for implementation cost */
+  implementationDistribution: FactorShares;
+  /** Maintenance cost — years 2 through T (US$/ha) */
+  maintenanceCost: number;
+  /** Factor-of-production distribution for maintenance cost */
+  maintenanceDistribution: FactorShares;
+}
+
+/**
+ * Record mapping each method type to its baseline cost entry.
+ */
+export type MethodCosts = Record<MethodType, MethodCostEntry>;
 
 // ---------------------------------------------------------------------------
 // Assistance Activity Cost
@@ -131,10 +188,16 @@ export interface RestorationModel {
   ecosystem: string;
   /** Country where the project is located */
   country: string;
-  /** Restoration method (e.g., "Natural regeneration", "Total planting") */
-  method: string;
-  /** Time horizon in years (default: 20) */
+  /** Time horizon in years (fixed: 20) */
   timeHorizon: number;
+
+  // ---- Restoration Method ----
+  /** Baseline ecological method selected via tab interface */
+  methodType: MethodType;
+  /** Enrichment planting intensity (0–100%), derived from method tab */
+  enrichmentIntensity: number;
+  /** Baseline implementation + maintenance costs for ALL four method tabs */
+  methodCosts: MethodCosts;
 
   // ---- Context & Scenario Definition ----
   /** Contextual conditions that describe the local site */

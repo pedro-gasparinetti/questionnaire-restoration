@@ -392,29 +392,337 @@
   font-size: 0.85rem;
   border-collapse: collapse;
   margin-top: 0.25rem;
+  margin-bottom: 1.25rem;
+}
+
+.summary-table caption {
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.88rem;
+  color: #2d6a4f;
+  padding: 0.5rem 0.25rem 0.35rem;
+  border-bottom: 2px solid #2d6a4f;
+  caption-side: top;
 }
 
 .summary-table th,
 .summary-table td {
   text-align: left;
-  padding: 0.35rem 0.5rem;
+  padding: 0.4rem 0.6rem;
   border-bottom: 1px solid #eee;
+  font-variant-numeric: tabular-nums;
 }
 
 .summary-table th {
   font-weight: 600;
   color: #555;
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   text-transform: uppercase;
   letter-spacing: 0.04em;
+  background: #f8faf9;
 }
 
 .summary-table-total td {
-  border-top: 2px solid #ccc;
+  border-top: 2px solid #b5c4b1;
   border-bottom: none;
+  font-weight: 700;
+  background: #f0f6f0;
+}
+
+.summary-row-warn td {
+  background: #fff8f0;
+  color: #92400e;
+}
+
+/* Per-method summary block */
+.summary-method-block {
+  margin-bottom: 2rem;
+  padding: 1rem 1.25rem;
+  border: 1px solid #dde3ea;
+  border-radius: 8px;
+  background: #fafbfc;
+}
+
+.summary-method-block:last-of-type {
+  margin-bottom: 1rem;
+}
+
+.summary-method-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #16623b;
+  margin: 0 0 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #c9dfc9;
+}
+
+/* Consistency check */
+.summary-consistency {
+  margin-top: 1rem;
+  border: 1px solid #dde3ea;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.summary-consistency-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: #f1f4f8;
+  border: none;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #333;
+  text-align: left;
+}
+
+.summary-consistency-toggle:hover {
+  background: #e8ecf2;
+}
+
+.summary-consistency-body {
+  padding: 0.75rem 1rem 1rem;
+}
+
+.consistency-method {
+  margin-bottom: 1rem;
+}
+
+.consistency-method:last-child {
+  margin-bottom: 0;
+}
+
+.consistency-method h5 {
+  font-size: 0.88rem;
+  color: #16623b;
+  margin: 0 0 0.4rem;
+}
+
+.consistency-checks {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-size: 0.84rem;
+}
+
+.consistency-checks li {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.25rem 0;
+}
+
+.consistency-ok {
+  color: #166534;
+}
+
+.consistency-warn {
+  color: #b91c1c;
+  font-weight: 600;
+}
+
+/* Summary warnings */
+.summary-warning {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: #b91c1c;
+  font-size: 0.84rem;
+  font-weight: 500;
+  margin: 0.25rem 0 1rem;
+  padding: 0.4rem 0.6rem;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 4px;
 }
 
 /* --- Saved Models Panel ------------------------------------------------ */
+
+/* --- Method Tabs ------------------------------------------------------- */
+
+.method-tabs {
+  margin: 0.75rem 0 1rem;
+  border: 1px solid #dde3ea;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.method-tabs-header {
+  display: flex;
+  flex-wrap: wrap;
+  background: #f1f4f8;
+  border-bottom: 2px solid #dde3ea;
+}
+
+.method-tab {
+  flex: 1 1 0;
+  min-width: 140px;
+  padding: 0.65rem 0.75rem;
+  border: none;
+  background: transparent;
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #555;
+  cursor: pointer;
+  text-align: center;
+  transition: background 0.15s, color 0.15s;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -2px;
+}
+
+.method-tab:hover {
+  background: #e4eaf0;
+  color: #16623b;
+}
+
+.method-tab--active {
+  background: #fff;
+  color: #16623b;
+  border-bottom-color: #16623b;
+}
+
+.tab-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  font-size: 0.65rem;
+  font-weight: 700;
+  margin-left: 0.35rem;
+  flex-shrink: 0;
+}
+
+.tab-badge--done {
+  background: #16623b;
+  color: #fff;
+}
+
+.tab-badge--pending {
+  background: #dde3ea;
+  color: #666;
+}
+
+.method-tab-content {
+  padding: 1rem 1.25rem;
+  background: #fff;
+}
+
+.method-info-box {
+  background: #f0f7f2;
+  border-left: 4px solid #16623b;
+  padding: 0.85rem 1rem;
+  border-radius: 0 6px 6px 0;
+  margin-bottom: 1rem;
+}
+
+.method-info-box p {
+  margin: 0 0 0.5rem;
+  font-size: 0.85rem;
+  line-height: 1.55;
+  color: #2a4a38;
+}
+
+.method-info-box p:last-child {
+  margin-bottom: 0;
+}
+
+.ecological-conditions {
+  margin-bottom: 1rem;
+}
+
+.ecological-conditions h4 {
+  margin: 0 0 0.4rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.condition-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.condition-badge {
+  display: inline-block;
+  padding: 0.3rem 0.65rem;
+  background: #eef2f6;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  color: #444;
+}
+
+.condition-badge strong {
+  color: #16623b;
+}
+
+.enrichment-block {
+  margin-bottom: 0.25rem;
+}
+
+.enrichment-block h4 {
+  margin: 0 0 0.35rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.form-warning {
+  color: #b45309;
+  background: #fef3c7;
+  border: 1px solid #fcd34d;
+  border-radius: 4px;
+  padding: 0.45rem 0.65rem;
+  font-size: 0.82rem;
+  margin-top: 0.4rem;
+}
+
+/* --- InfoBox (reusable explanatory container) -------------------------- */
+
+.info-box {
+  background: #f0f7f4;
+  border: 1px solid #c3ddd0;
+  border-left: 4px solid #16623b;
+  border-radius: 0 6px 6px 0;
+  padding: 0.75rem 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.info-box--warning {
+  background: #fefce8;
+  border-color: #fcd34d;
+  border-left-color: #d97706;
+}
+
+.info-box-header {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 0.4rem;
+  color: #16623b;
+  font-size: 0.82rem;
+}
+
+.info-box--warning .info-box-header {
+  color: #92400e;
+}
+
+.info-box-body p {
+  margin: 0 0 0.4rem;
+  font-size: 0.82rem;
+  line-height: 1.55;
+  color: #374151;
+}
+
+.info-box-body p:last-child {
+  margin-bottom: 0;
+}
 
 /* --- Checkbox Grid (assistance selection) ------------------------------ */
 
@@ -468,6 +776,39 @@
 
 /* --- Factor Shares Rows ------------------------------------------------ */
 
+/* --- Constraint Cards -------------------------------------------------- */
+
+.constraint-card {
+  margin-bottom: 1rem;
+  padding: 1rem;
+  background: #fcfcfd;
+  border: 1px solid #dde3ea;
+  border-radius: 8px;
+}
+
+.constraint-card-title {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: #16623b;
+  margin: 0 0 0.65rem;
+}
+
+.constraint-phase {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin: 0.5rem 0;
+  flex-wrap: wrap;
+}
+
+.constraint-phase-label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #444;
+}
+
+/* --- Factor Shares Rows ------------------------------------------------ */
+
 .factor-shares-row {
   margin-bottom: 1rem;
   padding: 0.75rem;
@@ -481,6 +822,76 @@
   font-size: 0.88rem;
   font-weight: 600;
   color: #16623b;
+}
+
+/* --- Cost Distribution ------------------------------------------------- */
+
+.cost-distribution {
+  margin-top: 0.75rem;
+  padding: 0.75rem;
+  background: #f8faf9;
+  border: 1px solid #e2e8ee;
+  border-radius: 6px;
+  max-width: 520px;
+}
+
+.cost-distribution-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #16623b;
+  margin: 0 0 0.35rem;
+}
+
+.cost-distribution-hint {
+  font-weight: 400;
+  color: #888;
+  font-size: 0.78rem;
+}
+
+.cost-distribution-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 0.5rem;
+}
+
+@media (max-width: 540px) {
+  .cost-distribution-fields {
+    grid-template-columns: 1fr;
+  }
+}
+
+.cost-distribution-examples {
+  font-size: 0.76rem;
+  color: #888;
+  font-style: italic;
+  margin: 0.4rem 0 0;
+  line-height: 1.4;
+}
+
+.cost-distribution-sum {
+  display: inline-block;
+  margin-left: 0.5rem;
+  padding: 0.1rem 0.5rem;
+  border-radius: 10px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.cost-distribution-sum--ok {
+  background: #e6f4ea;
+  color: #1a7f37;
+}
+
+.cost-distribution-sum--warn {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.cost-distribution-warning {
+  font-size: 0.78rem;
+  color: #c0392b;
+  margin: 0.15rem 0 0.4rem;
+  font-weight: 500;
 }
 
 /* --- Saved Models Panel ------------------------------------------------ */
