@@ -4,7 +4,7 @@
  * Narrative flow:
  *   1. Identification (ecosystem, country, method, time horizon)
  *   2. Method Costs (4 tabs with implementation + maintenance costs & distributions)
- *   3. Additional Context Variables & Constraints
+ *   3. Context Constraints & Additional Costs
  *   4. Summary & Validation
  */
 

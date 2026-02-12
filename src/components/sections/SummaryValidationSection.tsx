@@ -3,7 +3,7 @@
  *
  * Generates one summary block per restoration method with:
  *   Section 1 — Favorable Scenario (implementation + maintenance)
- *   Section 2 — Additional Context Variables & Constraints
+ *   Section 2 — Context Constraints & Additional Costs
  *   Section 3 — Unfavourable Scenario (computed vs declared)
  *   Production Factor Breakdown (weighted distributions)
  *   Mathematical Consistency Check (collapsible)
@@ -247,9 +247,9 @@ function MethodSummaryBlock({ summary: m }: { summary: MethodSummary }) {
         ]}
       />
 
-      {/* Section 2 — Additional Context Variables & Constraints */}
+      {/* Section 2 — Context Constraints & Additional Costs */}
       <SummaryTable
-        caption="Additional Context Variables &amp; Constraints"
+        caption="Context Constraints &amp; Additional Costs"
         headers={["Constraint", "Cost", "Phase"]}
         rows={[
           ...m.constraints.map((c) => ({

@@ -137,6 +137,9 @@ export const EMPTY_METHOD_COST_ENTRY = {
   implementationDistribution: { ...EMPTY_COST_DISTRIBUTION },
   maintenanceCost: 0,
   maintenanceDistribution: { ...EMPTY_COST_DISTRIBUTION },
+  intensiveMaintenanceStartYear: 3,
+  intensiveMaintenanceEndYear: 6,
+  intensiveMaintenanceCost: 0,
 };
 
 /** Default empty method costs for all four tabs */
@@ -192,5 +195,6 @@ export const DEFAULT_FORM_VALUES: RestorationModelFormData = {
   laborBreakdown: {
     implementation: { hiredLabor: 0, familyLabor: 0 },
     maintenance: { hiredLabor: 0, familyLabor: 0 },
+    hiredLaborCostPerDay: 0,
   },
 };

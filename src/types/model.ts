@@ -142,6 +142,12 @@ export interface MethodCostEntry {
   maintenanceCost: number;
   /** Factor-of-production distribution for maintenance cost */
   maintenanceDistribution: FactorShares;
+  /** Start year of the intensive maintenance period (1–30) */
+  intensiveMaintenanceStartYear: number;
+  /** End year of the intensive maintenance period (1–30) */
+  intensiveMaintenanceEndYear: number;
+  /** Cost for the intensive maintenance period (US$/ha) */
+  intensiveMaintenanceCost: number;
 }
 
 /**
@@ -250,6 +256,8 @@ export interface LaborBreakdown {
   implementation: LaborPhaseBreakdown;
   /** Hired vs family labor split for maintenance phase (Years 2–T) */
   maintenance: LaborPhaseBreakdown;
+  /** Hired labor daily rate — regional reference (US$/day) */
+  hiredLaborCostPerDay: number;
 }
 
 // ---------------------------------------------------------------------------

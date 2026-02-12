@@ -43,6 +43,10 @@ export function ContextSection() {
   const maintLabor  = watch(`methodCosts.${activeTab}.maintenanceDistribution.labor`);
   const maintMach   = watch(`methodCosts.${activeTab}.maintenanceDistribution.machinery`);
   const maintMat    = watch(`methodCosts.${activeTab}.maintenanceDistribution.materials`);
+  const intensiveStart = watch(`methodCosts.${activeTab}.intensiveMaintenanceStartYear`) ?? 3;
+  const intensiveEnd   = watch(`methodCosts.${activeTab}.intensiveMaintenanceEndYear`) ?? 6;
+  const implCostVal    = watch(`methodCosts.${activeTab}.implementationCost`) ?? 0;
+  const maintCostVal   = watch(`methodCosts.${activeTab}.maintenanceCost`) ?? 0;
 
   const implSum  = (Number(implLabor) || 0) + (Number(implMach) || 0) + (Number(implMat) || 0);
   const maintSum = (Number(maintLabor) || 0) + (Number(maintMach) || 0) + (Number(maintMat) || 0);
@@ -197,9 +201,18 @@ export function ContextSection() {
                 error={errors.methodCosts?.[activeTab]?.implementationDistribution?.materials}
               />
             </div>
+            {isImplDistFilled && Number(implCostVal) > 0 && (
+              <p className="cost-distribution-abs">
+                Labor: US$ {((Number(implLabor) || 0) / 100 * Number(implCostVal)).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}/ha
+                {" · "}Machinery: US$ {((Number(implMach) || 0) / 100 * Number(implCostVal)).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}/ha
+                {" · "}Materials: US$ {((Number(implMat) || 0) / 100 * Number(implCostVal)).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}/ha
+              </p>
+            )}
             <p className="cost-distribution-examples">
               Materials: {activeTabData.implementationMaterialExamples}
             </p>
+
+
           </div>
 
           {/* ── Basic Maintenance Costs ────────────────────────── */}
@@ -219,6 +232,77 @@ export function ContextSection() {
                 valueAsNumber: true,
               })}
               error={errors.methodCosts?.[activeTab]?.maintenanceCost}
+            />
+          </div>
+
+          {/* Intensive maintenance period dual-range slider */}
+          <div className="plateau-slider">
+            <label className="plateau-slider-label">
+              Intensive maintenance period
+              <span className="plateau-slider-value">Year {intensiveStart} – {intensiveEnd}</span>
+            </label>
+            <p className="plateau-slider-hint">
+              Define the start and end years of the intensive (higher-cost) maintenance period,
+              before costs stabilise to a long-term standard plateau.
+            </p>
+            <div className="dual-range-container">
+              <div className="dual-range-track">
+                <div
+                  className="dual-range-fill"
+                  style={{
+                    left: `${((Number(intensiveStart) - 1) / 29) * 100}%`,
+                    width: `${((Number(intensiveEnd) - Number(intensiveStart)) / 29) * 100}%`,
+                  }}
+                />
+                <input
+                  type="range"
+                  min="1"
+                  max="30"
+                  step="1"
+                  className="dual-range-input dual-range-start"
+                  value={intensiveStart}
+                  onChange={(e) => {
+                    const v = Number(e.target.value);
+                    if (v < Number(intensiveEnd)) {
+                      setValue(`methodCosts.${activeTab}.intensiveMaintenanceStartYear`, v, { shouldDirty: true });
+                    }
+                  }}
+                />
+                <input
+                  type="range"
+                  min="1"
+                  max="30"
+                  step="1"
+                  className="dual-range-input dual-range-end"
+                  value={intensiveEnd}
+                  onChange={(e) => {
+                    const v = Number(e.target.value);
+                    if (v > Number(intensiveStart)) {
+                      setValue(`methodCosts.${activeTab}.intensiveMaintenanceEndYear`, v, { shouldDirty: true });
+                    }
+                  }}
+                />
+              </div>
+              <div className="plateau-slider-ticks">
+                {[1, 5, 10, 15, 20, 25, 30].map((y) => (
+                  <span key={y} className="plateau-tick">{y}</span>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Intensive maintenance cost field */}
+          <div style={{ maxWidth: "320px", marginTop: "0.75rem" }}>
+            <FormField
+              label={`Intensive Maintenance Cost (Years ${intensiveStart}–${intensiveEnd})`}
+              unit="US$/ha"
+              type="number"
+              min="0"
+              step="0.01"
+              registration={register(`methodCosts.${activeTab}.intensiveMaintenanceCost`, {
+                valueAsNumber: true,
+              })}
+              error={errors.methodCosts?.[activeTab]?.intensiveMaintenanceCost}
             />
           </div>
 
@@ -276,6 +360,13 @@ export function ContextSection() {
                 error={errors.methodCosts?.[activeTab]?.maintenanceDistribution?.materials}
               />
             </div>
+            {isMaintDistFilled && Number(maintCostVal) > 0 && (
+              <p className="cost-distribution-abs">
+                Labor: US$ {((Number(maintLabor) || 0) / 100 * Number(maintCostVal)).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}/ha
+                {" · "}Machinery: US$ {((Number(maintMach) || 0) / 100 * Number(maintCostVal)).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}/ha
+                {" · "}Materials: US$ {((Number(maintMat) || 0) / 100 * Number(maintCostVal)).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}/ha
+              </p>
+            )}
             <p className="cost-distribution-examples">
               Materials: {activeTabData.maintenanceMaterialExamples}
             </p>

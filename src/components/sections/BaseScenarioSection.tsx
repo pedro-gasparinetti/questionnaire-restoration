@@ -28,7 +28,7 @@ export function CostEstimatesSection() {
 
   return (
     <CollapsibleSection
-      title="3. Additional Context Variables &amp; Constraints"
+      title="3. Context Constraints &amp; Additional Costs"
       subtitle="Costs that apply independently of the restoration method"
     >
       <p className="form-hint">
@@ -39,6 +39,7 @@ export function CostEstimatesSection() {
       </p>
 
       {CONTEXT_CONSTRAINTS.map((c) => {
+        const costVal   = watch(`contextVariables.${c.key}.cost`);
         const distLabor = watch(`contextVariables.${c.key}.distribution.labor`);
         const distMach  = watch(`contextVariables.${c.key}.distribution.machinery`);
         const distMat   = watch(`contextVariables.${c.key}.distribution.materials`);
@@ -98,6 +99,11 @@ export function CostEstimatesSection() {
                   The distribution must sum to exactly 100%. Currently: {distSum.toFixed(1)}%.
                 </p>
               )}
+              {!distFilled && (
+                <p className="cost-distribution-warning">
+                  Please fill in the cost distribution for this cost category.
+                </p>
+              )}
               <div className="cost-distribution-fields">
                 <FormField
                   label="Labor %"
@@ -127,6 +133,13 @@ export function CostEstimatesSection() {
                   error={ctxErrors?.[c.key]?.distribution?.materials}
                 />
               </div>
+              {distFilled && Number(costVal) > 0 && (
+                <p className="cost-distribution-abs">
+                  Labor: US$ {((Number(distLabor) || 0) / 100 * Number(costVal)).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}/{c.unit.replace("US$/", "")}
+                  {" · "}Machinery: US$ {((Number(distMach) || 0) / 100 * Number(costVal)).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}/{c.unit.replace("US$/", "")}
+                  {" · "}Materials: US$ {((Number(distMat) || 0) / 100 * Number(costVal)).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}/{c.unit.replace("US$/", "")}
+                </p>
+              )}
             </div>
           </div>
         );

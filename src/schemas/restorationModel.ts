@@ -126,6 +126,22 @@ export const methodCostEntrySchema = z.object({
     .number({ message: "Maintenance cost is required" })
     .min(0, "Cannot be negative"),
   maintenanceDistribution: costDistributionSchema,
+  intensiveMaintenanceStartYear: z
+    .number({ message: "Start year is required" })
+    .int("Must be a whole number")
+    .min(1, "Minimum 1 year")
+    .max(30, "Maximum 30 years")
+    .default(3),
+  intensiveMaintenanceEndYear: z
+    .number({ message: "End year is required" })
+    .int("Must be a whole number")
+    .min(1, "Minimum 1 year")
+    .max(30, "Maximum 30 years")
+    .default(6),
+  intensiveMaintenanceCost: z
+    .number({ message: "Intensive maintenance cost is required" })
+    .min(0, "Cannot be negative")
+    .default(0),
 });
 
 export const methodCostsSchema = z.object({
@@ -194,6 +210,10 @@ export const restorationModelSchema = z.object({
       message: "Hired + Family labor must sum to 100%",
       path: ["hiredLabor"],
     }),
+    hiredLaborCostPerDay: z
+      .number({ message: "Hired labor cost is required" })
+      .min(0, "Cannot be negative")
+      .default(0),
   }),
 });
 

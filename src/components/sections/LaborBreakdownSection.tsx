@@ -157,6 +157,27 @@ export function LaborBreakdownSection() {
           />
         </div>
       </div>
+
+      {/* Hired Labor Cost Reference */}
+      <div className="labor-rate-box" style={{ marginTop: "1.5rem" }}>
+        <h5 className="labor-rate-title">Hired Labor Cost Reference</h5>
+        <div style={{ maxWidth: "280px" }}>
+          <FormField
+            label="Hired Labor Cost"
+            unit="US$/day"
+            type="number"
+            min="0"
+            step="0.01"
+            registration={register("laborBreakdown.hiredLaborCostPerDay", {
+              valueAsNumber: true,
+            })}
+            error={laborErrors?.hiredLaborCostPerDay}
+          />
+        </div>
+        <p className="labor-rate-hint">
+          Average daily wage for hired field workers in this region.
+        </p>
+      </div>
     </CollapsibleSection>
   );
 }
