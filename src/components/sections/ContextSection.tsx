@@ -30,7 +30,6 @@ export function ContextSection() {
   } = useFormContext<RestorationModelFormData>();
 
   const currentMethodType = watch("methodType") || "anr_30";
-  const currentEnrichment = watch("enrichmentIntensity");
   const methodCosts = watch("methodCosts");
   const disabledMethods: MethodType[] = watch("disabledMethods") || [];
 
@@ -95,10 +94,6 @@ export function ContextSection() {
       if (firstAvailable) handleTabChange(firstAvailable.id);
     }
   }, [disabledMethods]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  // Enrichment warning for ANR tab
-  const showEnrichmentWarning =
-    activeTab === "anr_30" && currentEnrichment > 50;
 
   // Check if a tab's costs have been filled (both > 0) and distributions sum to 100%
   const isTabComplete = (tabId: string): boolean => {

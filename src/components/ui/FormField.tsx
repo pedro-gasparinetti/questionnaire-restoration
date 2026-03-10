@@ -15,7 +15,7 @@ interface FormFieldProps {
   unit?: string;
   error?: FieldError;
   registration: UseFormRegisterReturn;
-  type?: "text" | "number";
+  type?: "text" | "number" | "date";
   placeholder?: string;
   step?: string;
   min?: string;

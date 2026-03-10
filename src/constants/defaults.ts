@@ -217,10 +217,13 @@ export const EMPTY_CONTEXT_CONSTRAINT = {
 
 /** Default form values */
 export const DEFAULT_FORM_VALUES: RestorationModelFormData = {
+  userName: "",
+  dataCollectionDate: "",
   respondentName: "",
   gpsCoordinates: "",
   ecosystem: "",
   country: "",
+  city: "",
   timeHorizon: DEFAULT_TIME_HORIZON,
   disabledMethods: [],
   methodType: "anr_30",
