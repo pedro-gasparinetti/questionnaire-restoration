@@ -13,9 +13,8 @@ import { Coins } from "lucide-react";
 
 const CONTEXT_CONSTRAINTS = [
   { key: "fireRisk" as const, label: "Firebreak / Fire Risk", unit: "US$/ha" },
-  { key: "grazingPressure" as const, label: "Fencing / Grazing Pressure", unit: "US$/km", unitWarning: "⚠ Note: this cost is per kilometre of fence (km), not per hectare." },
+  { key: "grazingPressure" as const, label: "Fencing / Grazing Pressure", unit: "US$/km", unitWarning: "⚠ Note: this cost is per kilometre of fence (1 km), not per hectare." },
   { key: "invasiveSpeciesPressure" as const, label: "Weed Control / Invasive Species Pressure", unit: "US$/ha" },
-  { key: "humanEncroachment" as const, label: "Monitoring / Human Encroachment", unit: "US$/ha" },
 ];
 
 export function CostEstimatesSection() {
@@ -42,20 +41,25 @@ export function CostEstimatesSection() {
 
       {CONTEXT_CONSTRAINTS.map((c) => {
         const costVal   = watch(`contextVariables.${c.key}.cost`);
+        const occurrences = watch(`contextVariables.${c.key}.occurrences`);
         const distLabor = watch(`contextVariables.${c.key}.distribution.labor`);
         const distMach  = watch(`contextVariables.${c.key}.distribution.machinery`);
         const distMat   = watch(`contextVariables.${c.key}.distribution.materials`);
         const distSum   = (Number(distLabor) || 0) + (Number(distMach) || 0) + (Number(distMat) || 0);
         const distFilled = distSum > 0;
-        const appliesToMaint = watch(`contextVariables.${c.key}.appliesToMaintenance`);
+        const totalCost = (Number(costVal) || 0) * (Number(occurrences) || 0);
 
         return (
           <div key={c.key} className="constraint-card">
             <h4 className="constraint-card-title">{c.label}</h4>
 
-            <div style={{ maxWidth: "280px" }}>
+            <p className="form-hint" style={{ marginBottom: "0.75rem", fontSize: "0.85rem" }}>
+              Consider the total number of times this activity will need to occur over the 20-year project horizon (including both implementation and maintenance phases).
+            </p>
+
+            <div className="form-grid" style={{ maxWidth: "480px" }}>
               <FormField
-                label="Estimated Cost"
+                label="Unit Cost"
                 unit={c.unit}
                 type="number"
                 min="0"
@@ -63,52 +67,26 @@ export function CostEstimatesSection() {
                 registration={register(`contextVariables.${c.key}.cost`, { valueAsNumber: true })}
                 error={ctxErrors?.[c.key]?.cost}
               />
-              {c.unitWarning && (
-                <p className="unit-warning" style={{ color: "#b45309", fontSize: "0.82rem", margin: "0.25rem 0 0", fontStyle: "italic" }}>
-                  {c.unitWarning}
-                </p>
-              )}
+              <FormField
+                label="Number of occurrences"
+                unit="times"
+                type="number"
+                min="0"
+                step="1"
+                placeholder="e.g., 5"
+                registration={register(`contextVariables.${c.key}.occurrences`, { valueAsNumber: true })}
+                error={ctxErrors?.[c.key]?.occurrences}
+              />
             </div>
-
-            <div className="constraint-phase">
-              <span className="constraint-phase-label">Applies to:</span>
-              <label className="checkbox-label">
-                <input
-                  type="checkbox"
-                  {...register(`contextVariables.${c.key}.appliesToImplementation`)}
-                />
-                <span>Implementation (Year 1)</span>
-              </label>
-              <label className="checkbox-label">
-                <input
-                  type="checkbox"
-                  {...register(`contextVariables.${c.key}.appliesToMaintenance`)}
-                />
-                <span>Maintenance (Years 2–20)</span>
-              </label>
-            </div>
-
-            {appliesToMaint && (
-              <div className="form-grid" style={{ maxWidth: "360px", marginTop: "0.5rem", marginBottom: "0.25rem" }}>
-                <FormField
-                  label="Maintenance start year"
-                  type="number"
-                  min="2"
-                  max="20"
-                  step="1"
-                  registration={register(`contextVariables.${c.key}.maintenanceStartYear`, { valueAsNumber: true })}
-                  error={ctxErrors?.[c.key]?.maintenanceStartYear}
-                />
-                <FormField
-                  label="Maintenance end year"
-                  type="number"
-                  min="2"
-                  max="20"
-                  step="1"
-                  registration={register(`contextVariables.${c.key}.maintenanceEndYear`, { valueAsNumber: true })}
-                  error={ctxErrors?.[c.key]?.maintenanceEndYear}
-                />
-              </div>
+            {c.unitWarning && (
+              <p className="unit-warning" style={{ color: "#b45309", fontSize: "0.82rem", margin: "0.25rem 0 0.5rem", fontStyle: "italic" }}>
+                {c.unitWarning}
+              </p>
+            )}
+            {totalCost > 0 && (
+              <p style={{ fontSize: "0.85rem", color: "#374151", margin: "0.25rem 0 0.5rem", fontWeight: 500 }}>
+                Total cost: US$ {totalCost.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              </p>
             )}
 
             <div className="cost-distribution" style={{ marginTop: "0.5rem" }}>

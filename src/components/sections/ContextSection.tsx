@@ -16,7 +16,7 @@
 import { useState, useEffect } from "react";
 import { useFormContext } from "react-hook-form";
 import type { RestorationModelFormData } from "../../schemas";
-import { CollapsibleSection, FormField, InfoBox, CostTimelineBuilder, DistributionPie } from "../ui";
+import { CollapsibleSection, FormField, InfoBox, CostTimelineBuilder, RevenueTimelineBuilder, ProductivityTimelineBuilder, DistributionPie } from "../ui";
 import { METHOD_TABS } from "../../constants";
 import type { MethodType } from "../../types";
 import { Sprout } from "lucide-react";
@@ -29,7 +29,7 @@ export function ContextSection() {
     formState: { errors },
   } = useFormContext<RestorationModelFormData>();
 
-  const currentMethodType = watch("methodType") || "natural_regeneration";
+  const currentMethodType = watch("methodType") || "anr_30";
   const currentEnrichment = watch("enrichmentIntensity");
   const methodCosts = watch("methodCosts");
   const disabledMethods: MethodType[] = watch("disabledMethods") || [];
@@ -155,30 +155,40 @@ export function ContextSection() {
         and <strong>natural regenerating seedlings availability</strong>. The time horizon
         for the analysis is <strong>20 years</strong>.
       </p>
-      <p className="form-hint" style={{ marginBottom: "1rem" }}>
-        Please fill in the cost parameters for the method tabs below.
-        At least one tab must be completed before you can save or export the results.
-      </p>
 
       {visibleTabs.length === 0 ? (
         <div className="method-exclusion-notice" style={{ marginBottom: "1rem" }}>
           ⚠️ All methods have been marked as having no data. Uncheck at least one above to fill in cost information.
         </div>
       ) : (
+      <>
+      {/* Progress banner */}
+      <div className="tabs-progress-banner">
+        <div className="tabs-progress-icon">📋</div>
+        <div className="tabs-progress-text">
+          <strong>Complete all {visibleTabs.length} restoration methods below.</strong>{" "}
+          Click each tab to fill in costs and distributions.
+          <span className="tabs-progress-count">
+            {visibleTabs.filter(t => isTabComplete(t.id)).length} of {visibleTabs.length} completed
+          </span>
+        </div>
+      </div>
+
       <div className="method-tabs">
         <div className="method-tabs-header">
-          {visibleTabs.map((tab) => (
+          {visibleTabs.map((tab, idx) => (
             <button
               key={tab.id}
               type="button"
-              className={`method-tab ${activeTab === tab.id ? "method-tab--active" : ""}`}
+              className={`method-tab ${activeTab === tab.id ? "method-tab--active" : ""} ${isTabComplete(tab.id) ? "method-tab--complete" : "method-tab--incomplete"}`}
               onClick={() => handleTabChange(tab.id)}
             >
-              {tab.title}
+              <span className="tab-step-number">{idx + 1}</span>
+              <span className="tab-label">{tab.title}</span>
               {isTabComplete(tab.id) ? (
                 <span className="tab-badge tab-badge--done" title="Completed">✓</span>
               ) : (
-                <span className="tab-badge tab-badge--pending" title="Pending">○</span>
+                <span className="tab-badge tab-badge--pending" title="Click to fill in">⬤</span>
               )}
             </button>
           ))}
@@ -197,6 +207,24 @@ export function ContextSection() {
               <p key={i}>{line}</p>
             ))}
           </div>
+
+          {/* ── NTFP Species (only for NTFP tabs) ──────────────── */}
+          {activeTab.endsWith("_ntfp") && (
+            <div className="ntfp-species-box">
+              <h4 style={{ marginTop: "0.5rem", marginBottom: "0.35rem" }}>NTFP Species</h4>
+              <p className="form-hint" style={{ marginBottom: "0.5rem" }}>
+                Select one native Non-Timber Forest Product (NTFP) species with good market potential in your region.
+              </p>
+              <div style={{ maxWidth: "480px" }}>
+                <FormField
+                  label="NTFP Species"
+                  placeholder="e.g., Açaí (Euterpe oleracea), Babaçu (Attalea speciosa)"
+                  registration={register(`methodCosts.${activeTab}.ntfpSpecies`)}
+                  error={errors.methodCosts?.[activeTab]?.ntfpSpecies}
+                />
+              </div>
+            </div>
+          )}
 
           {/* ── Basic Implementation Costs ───────────────────────── */}
           <h4 style={{ marginTop: "1.25rem", marginBottom: "0.5rem" }}>Basic Implementation Costs (Year 1)</h4>
@@ -227,6 +255,9 @@ export function ContextSection() {
                 { label: "Materials", value: Number(implMat)   || 0, color: "#7c3aed" },
               ]} />
             </div>
+            <p className="cost-distribution-hint">
+              What is the average percentage of the total implementation cost that refers to labor, materials, and machinery? The three values must sum to 100%.
+            </p>
             {isImplDistFilled && Math.abs(implSum - 100) >= 0.01 && (
               <p className="cost-distribution-warning">
                 The distribution must sum to exactly 100%. Currently: {implSum.toFixed(1)}%.
@@ -309,6 +340,9 @@ export function ContextSection() {
                 { label: "Materials", value: Number(maintMat)   || 0, color: "#7c3aed" },
               ]} />
             </div>
+            <p className="cost-distribution-hint">
+              What is the average percentage of the total maintenance cost that refers to labor, materials, and machinery? The three values must sum to 100%.
+            </p>
             {isMaintDistFilled && Math.abs(maintSum - 100) >= 0.01 && (
               <p className="cost-distribution-warning">
                 The distribution must sum to exactly 100%. Currently: {maintSum.toFixed(1)}%.
@@ -360,8 +394,66 @@ export function ContextSection() {
               Materials: {activeTabData.maintenanceMaterialExamples}
             </p>
           </div>
+
+          {/* ── NTFP Revenue (only for NTFP tabs) ───────────── */}
+          {activeTab.endsWith("_ntfp") && (
+            <>
+              <hr className="cost-section-divider" />
+              <div className="ntfp-revenue-section">
+                <h4 style={{ marginTop: "1.25rem", marginBottom: "0.5rem", color: "#1a7a42" }}>
+                  🌿 NTFP Revenue
+                </h4>
+                <p className="form-hint" style={{ marginBottom: "0.75rem" }}>
+                  Estimate the expected revenue from Non-Timber Forest Products (NTFP) harvested during the maintenance period.
+                </p>
+
+                <div style={{ marginBottom: "1rem" }}>
+                  <h5 style={{ marginBottom: "0.35rem", color: "#92400e", fontSize: "0.9rem" }}>Average NTFP Productivity</h5>
+                  <p className="form-hint" style={{ marginBottom: "0.5rem" }}>
+                    Estimate how NTFP productivity (kg/ha/yr) changes over the maintenance period as the forest matures.
+                  </p>
+                  <ProductivityTimelineBuilder
+                    key={`prod-${activeTab}`}
+                    startYear={2}
+                    maxYear={20}
+                    onAverageChange={(avg) =>
+                      setValue(`methodCosts.${activeTab}.ntfpProductivity`, avg, { shouldDirty: true })
+                    }
+                  />
+                </div>
+
+                <div className="form-grid" style={{ maxWidth: "480px", marginBottom: "1rem" }}>
+                  <FormField
+                    label="Average Price during Harvesting Season"
+                    unit="US$/kg"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    placeholder="e.g., 2.50"
+                    registration={register(`methodCosts.${activeTab}.ntfpPrice`, {
+                      valueAsNumber: true,
+                    })}
+                    error={errors.methodCosts?.[activeTab]?.ntfpPrice}
+                  />
+                </div>
+
+                <p className="form-hint" style={{ marginTop: "0.5rem" }}>
+                  Add revenue segments for different year ranges. NTFP productivity may vary as the forest matures.
+                </p>
+                <RevenueTimelineBuilder
+                  key={`rev-${activeTab}`}
+                  startYear={2}
+                  maxYear={20}
+                  onTotalChange={(total) =>
+                    setValue(`methodCosts.${activeTab}.ntfpRevenue`, total, { shouldDirty: true })
+                  }
+                />
+              </div>
+            </>
+          )}
         </div>
       </div>
+      </>
       )}
     </CollapsibleSection>
   );

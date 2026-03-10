@@ -10,13 +10,13 @@
 
 import { useState } from "react";
 import { FormProvider } from "react-hook-form";
-import { Save } from "lucide-react";
+import { Save, FlaskConical } from "lucide-react";
 import { useRestorationForm } from "../hooks/useRestorationForm";
 import { useComputedFields } from "../hooks/useComputedFields";
 import type { RestorationModelFormData } from "../schemas";
 import type { RestorationModel } from "../types";
 import { saveModel } from "../utils/storage";
-import { atLeastOneMethodTabComplete } from "../utils/computations";
+import { atLeastOneMethodTabComplete, generateTestData } from "../utils/computations";
 
 import {
   UserIdentificationSection,
@@ -58,6 +58,11 @@ export function RestorationForm({ initialData, onSaved }: Props) {
     onSaved?.();
   };
 
+  const handleGenerateTest = () => {
+    const testData = generateTestData();
+    reset(testData);
+  };
+
   return (
     <FormProvider {...form}>
       <form className="restoration-form" noValidate>
@@ -88,6 +93,14 @@ export function RestorationForm({ initialData, onSaved }: Props) {
             onClick={() => reset()}
           >
             Reset Form
+          </button>
+          <button
+            type="button"
+            className="btn btn--secondary"
+            onClick={handleGenerateTest}
+            style={{ background: "#7c3aed", color: "#fff", borderColor: "#7c3aed" }}
+          >
+            <FlaskConical size={16} /> Generate Test Data
           </button>
           <div className="form-actions-spacer" />
           <span className="form-actions-export-label">Export your data:</span>

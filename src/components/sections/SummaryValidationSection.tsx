@@ -28,7 +28,6 @@ const CONSTRAINT_META: Record<string, { label: string; unit: string }> = {
   fireRisk:                  { label: "Firebreak / Fire Risk",                    unit: "US$/ha" },
   grazingPressure:           { label: "Fencing / Grazing Pressure",               unit: "US$/km" },
   invasiveSpeciesPressure:   { label: "Weed Control / Invasive Species Pressure", unit: "US$/ha" },
-  humanEncroachment:         { label: "Monitoring / Human Encroachment",          unit: "US$/ha" },
 };
 
 // ---------------------------------------------------------------------------
@@ -92,11 +91,9 @@ interface MethodSummary {
     key: string;
     label: string;
     unit: string;
-    cost: number;
-    appliesToImpl: boolean;
-    appliesToMaint: boolean;
-    maintStartYear?: number;
-    maintEndYear?: number;
+    unitCost: number;
+    occurrences: number;
+    totalCost: number;
     distribution: FactorShares;
   }[];
   totalAdditional: number;
@@ -136,29 +133,28 @@ export function SummaryValidationSection(_props: Props) {
       const maintDist: FactorShares = entry.maintenanceDistribution ?? { labor: 0, materials: 0, machinery: 0 };
 
       // Context constraints
-      const constraintKeys = ["fireRisk", "grazingPressure", "invasiveSpeciesPressure", "humanEncroachment"] as const;
+      const constraintKeys = ["fireRisk", "grazingPressure", "invasiveSpeciesPressure"] as const;
       const constraints = constraintKeys.map((k) => {
         const c: ContextConstraintEntry = (ctx as any)[k] ?? {
           cost: 0,
-          appliesToImplementation: false,
-          appliesToMaintenance: false,
+          occurrences: 0,
           distribution: { labor: 0, materials: 0, machinery: 0 },
         };
         const meta = CONSTRAINT_META[k] ?? { label: k, unit: "US$/ha" };
+        const unitCost = Number(c.cost) || 0;
+        const occurrences = Number(c.occurrences) || 0;
         return {
           key: k,
           label: meta.label,
           unit: meta.unit,
-          cost: Number(c.cost) || 0,
-          appliesToImpl: !!c.appliesToImplementation,
-          appliesToMaint: !!c.appliesToMaintenance,
-          maintStartYear: c.maintenanceStartYear,
-          maintEndYear: c.maintenanceEndYear,
+          unitCost,
+          occurrences,
+          totalCost: unitCost * occurrences,
           distribution: c.distribution ?? { labor: 0, materials: 0, machinery: 0 },
         };
       });
 
-      const totalAdditional = constraints.reduce((s, c) => s + c.cost, 0);
+      const totalAdditional = constraints.reduce((s, c) => s + c.totalCost, 0);
       const computedUnfavourable = totalFavorable + totalAdditional;
 
       // Weighted factor shares — favorable
@@ -172,8 +168,8 @@ export function SummaryValidationSection(_props: Props) {
         { cost: implCost, shares: implDist },
         { cost: maintCost, shares: maintDist },
         ...constraints
-          .filter((c) => c.cost > 0)
-          .map((c) => ({ cost: c.cost, shares: c.distribution })),
+          .filter((c) => c.totalCost > 0)
+          .map((c) => ({ cost: c.totalCost, shares: c.distribution })),
       ];
       const unfavourableShares = weightedShares(unfavourableComponents);
 
@@ -236,28 +232,19 @@ function MethodSummaryBlock({ summary: m }: { summary: MethodSummary }) {
       {/* Section 2 — Context Constraints & Additional Costs */}
       <SummaryTable
         caption="Context Constraints &amp; Additional Costs"
-        headers={["Constraint", "Cost", "Phase"]}
+        headers={["Constraint", "Unit Cost", "Occurrences", "Total Cost"]}
         rows={[
           ...m.constraints.map((c) => ({
             label: c.label,
             values: [
-              c.cost > 0 ? `${fmt(c.cost)} ${c.unit}` : "—",
-              c.cost > 0
-                ? [
-                    c.appliesToImpl && "Impl.",
-                    c.appliesToMaint &&
-                      (c.maintStartYear && c.maintEndYear
-                        ? `Maint. (Yr ${c.maintStartYear}–${c.maintEndYear})`
-                        : "Maint."),
-                  ]
-                    .filter(Boolean)
-                    .join(" + ") || "—"
-                : "—",
+              c.unitCost > 0 ? `${fmt(c.unitCost)} ${c.unit}` : "—",
+              c.occurrences > 0 ? `${c.occurrences}` : "—",
+              c.totalCost > 0 ? formatUSD(c.totalCost) : "—",
             ],
           })),
           {
             label: "Total Additional Cost",
-            values: [formatUSD(m.totalAdditional), ""],
+            values: ["", "", formatUSD(m.totalAdditional)],
             className: "summary-table-total",
           },
         ]}

@@ -37,7 +37,7 @@ function App() {
       <header className="app-header">
         <div className="app-header-inner">
           <div>
-            <h1>Restoration Calculator Questionnaire</h1>
+            <h1>Restoration Cost Questionnaire</h1>
             <p className="app-subtitle">
               A project by{" "}
               <a

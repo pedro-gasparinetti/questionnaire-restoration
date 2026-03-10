@@ -83,16 +83,10 @@ export type BinaryConstraint = "yes" | "no";
  * when it is incurred, and how it breaks down across production factors.
  */
 export interface ContextConstraintEntry {
-  /** Estimated additional cost to address this constraint (US$/ha) */
+  /** Unit cost to address this constraint (US$/ha or US$/km) */
   cost: number;
-  /** Whether the cost applies to implementation (Year 1) */
-  appliesToImplementation: boolean;
-  /** Whether the cost applies to maintenance (Years 2–20) */
-  appliesToMaintenance: boolean;
-  /** Start year of the maintenance period for this constraint (Year 2–20) */
-  maintenanceStartYear?: number;
-  /** End year of the maintenance period for this constraint (Year 2–20) */
-  maintenanceEndYear?: number;
+  /** Number of times this activity needs to occur over the 20-year horizon */
+  occurrences: number;
   /** Factor-of-production distribution (labor / machinery / materials, must sum to 100%) */
   distribution: FactorShares;
 }
@@ -109,8 +103,6 @@ export interface ContextVariables {
   grazingPressure: ContextConstraintEntry;
   /** Weed Control / Invasive Species Pressure */
   invasiveSpeciesPressure: ContextConstraintEntry;
-  /** Monitoring / Human Encroachment */
-  humanEncroachment: ContextConstraintEntry;
 }
 
 // ---------------------------------------------------------------------------
@@ -124,8 +116,11 @@ export interface ContextVariables {
 export type MethodType =
   | "natural_regeneration"
   | "anr_30"
+  | "anr_30_ntfp"
   | "seed_dispersal"
-  | "seedling_planting";
+  | "seed_dispersal_ntfp"
+  | "seedling_planting"
+  | "seedling_planting_ntfp";
 
 // ---------------------------------------------------------------------------
 // Per-Method Baseline Cost Entry
@@ -152,6 +147,14 @@ export interface MethodCostEntry {
   intensiveMaintenanceEndYear: number;
   /** Cost for the intensive maintenance period (US$/ha) */
   intensiveMaintenanceCost: number;
+  /** NTFP species selected for harvesting (only for NTFP method variants) */
+  ntfpSpecies?: string;
+  /** Average NTFP productivity in kg/ha (only for NTFP method variants) */
+  ntfpProductivity?: number;
+  /** Average NTFP price in US$/kg (only for NTFP method variants) */
+  ntfpPrice?: number;
+  /** Total NTFP revenue in US$/ha (computed from timeline or manual) */
+  ntfpRevenue?: number;
 }
 
 /**

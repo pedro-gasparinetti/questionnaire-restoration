@@ -49,9 +49,9 @@ export function IdentificationSection() {
       icon={<ClipboardList size={20} />}
     >
       <p className="form-hint">
-        Each model specification applies to one <strong>ecosystem AND one restoration method</strong>{" "}
-        combination. Please identify the project below. The restoration method will be
-        selected in the next section.
+        Each model specification applies to one <strong>ecosystem</strong>. If you filled
+        the questionnaire based on an online interview, consider GPS coordinates of any
+        area that could represent the model you are referring to.
       </p>
 
       <div className="form-grid">

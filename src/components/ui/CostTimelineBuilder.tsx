@@ -220,7 +220,7 @@ export function CostTimelineBuilder({ startYear = 2, maxYear = 20, onTotalChange
             </div>
 
             <div className="cost-timeline-field cost-timeline-field--cost">
-              <label className="cost-timeline-input-label">Total cost (US$/ha)</label>
+              <label className="cost-timeline-input-label">Total cost (US$/ha/yr)</label>
               <input type="number" className="cost-timeline-input"
                 min={0} step={0.01} placeholder="0.00"
                 value={seg.cost === 0 ? "" : seg.cost}
@@ -239,7 +239,12 @@ export function CostTimelineBuilder({ startYear = 2, maxYear = 20, onTotalChange
       </div>
 
       <div className="cost-timeline-footer">
-        <button type="button" className="cost-timeline-add" onClick={add}>+ Add segment</button>
+        <div className="cost-timeline-add-row">
+          <button type="button" className="cost-timeline-add" onClick={add}>+ Add segment</button>
+          <span className="cost-timeline-add-hint">
+            Split the maintenance period into segments with different annual costs (e.g., intensive years vs. later years).
+          </span>
+        </div>
         {segments.length > 0 && (
           <span className="cost-timeline-total">Total: <strong>US$ {formatUSD(total)}/ha</strong></span>
         )}

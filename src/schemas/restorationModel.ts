@@ -101,20 +101,10 @@ export const contextConstraintEntrySchema = z.object({
   cost: z
     .number({ message: "Cost is required" })
     .min(0, "Cannot be negative"),
-  appliesToImplementation: z.boolean().default(false),
-  appliesToMaintenance: z.boolean().default(false),
-  maintenanceStartYear: z
-    .number()
+  occurrences: z
+    .number({ message: "Number of occurrences is required" })
     .int("Must be a whole number")
-    .min(2, "Minimum year 2 (year 1 is implementation)")
-    .max(20, "Cannot exceed 20 years")
-    .optional(),
-  maintenanceEndYear: z
-    .number()
-    .int("Must be a whole number")
-    .min(2, "Minimum year 2 (year 1 is implementation)")
-    .max(20, "Cannot exceed 20 years")
-    .optional(),
+    .min(0, "Cannot be negative"),
   distribution: costDistributionSchema,
 });
 
@@ -122,7 +112,6 @@ export const contextVariablesSchema = z.object({
   fireRisk: contextConstraintEntrySchema,
   grazingPressure: contextConstraintEntrySchema,
   invasiveSpeciesPressure: contextConstraintEntrySchema,
-  humanEncroachment: contextConstraintEntrySchema,
 });
 
 // ---------------------------------------------------------------------------
@@ -154,13 +143,20 @@ export const methodCostEntrySchema = z.object({
     .number({ message: "Intensive maintenance cost is required" })
     .min(0, "Cannot be negative")
     .default(0),
+  ntfpSpecies: z.string().optional().default(""),
+  ntfpProductivity: z.number().min(0, "Cannot be negative").optional().default(0),
+  ntfpPrice: z.number().min(0, "Cannot be negative").optional().default(0),
+  ntfpRevenue: z.number().min(0, "Cannot be negative").optional().default(0),
 });
 
 export const methodCostsSchema = z.object({
   natural_regeneration: methodCostEntrySchema,
   anr_30: methodCostEntrySchema,
+  anr_30_ntfp: methodCostEntrySchema,
   seed_dispersal: methodCostEntrySchema,
+  seed_dispersal_ntfp: methodCostEntrySchema,
   seedling_planting: methodCostEntrySchema,
+  seedling_planting_ntfp: methodCostEntrySchema,
 });
 
 // ---------------------------------------------------------------------------
@@ -194,10 +190,10 @@ export const restorationModelSchema = z.object({
   timeHorizon: z.literal(20).default(20),
 
   // Disabled methods (no data available)
-  disabledMethods: z.array(z.enum(["natural_regeneration", "anr_30", "seed_dispersal", "seedling_planting"])).optional().default([]),
+  disabledMethods: z.array(z.enum(["natural_regeneration", "anr_30", "anr_30_ntfp", "seed_dispersal", "seed_dispersal_ntfp", "seedling_planting", "seedling_planting_ntfp"])).optional().default([]),
 
   // Restoration Method (tab-based)
-  methodType: z.enum(["natural_regeneration", "anr_30", "seed_dispersal", "seedling_planting"]),
+  methodType: z.enum(["natural_regeneration", "anr_30", "anr_30_ntfp", "seed_dispersal", "seed_dispersal_ntfp", "seedling_planting", "seedling_planting_ntfp"]),
   enrichmentIntensity: z.number().min(0, "Cannot be negative").max(100, "Cannot exceed 100%"),
   methodCosts: methodCostsSchema,
 

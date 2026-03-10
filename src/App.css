@@ -652,10 +652,49 @@
   padding: 0.4rem 0.75rem;
 }
 
+/* --- Progress Banner --------------------------------------------------- */
+
+.tabs-progress-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.85rem 1rem;
+  margin-bottom: 0.75rem;
+  background: #eff8ff;
+  border: 1px solid #b6d8f2;
+  border-left: 4px solid #2596be;
+  border-radius: 6px;
+  font-size: 0.88rem;
+  line-height: 1.55;
+  color: #1a5276;
+}
+
+.tabs-progress-icon {
+  font-size: 1.3rem;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.tabs-progress-text {
+  flex: 1;
+}
+
+.tabs-progress-count {
+  display: inline-block;
+  margin-left: 0.5rem;
+  padding: 0.15rem 0.55rem;
+  background: #2596be;
+  color: #fff;
+  border-radius: 10px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  vertical-align: middle;
+}
+
 /* --- Method Tabs ------------------------------------------------------- */
 
 .method-tabs {
-  margin: 0.75rem 0 1rem;
+  margin: 0 0 1rem;
   border: 1px solid #dde3ea;
   border-radius: 8px;
   overflow: hidden;
@@ -666,23 +705,28 @@
   flex-wrap: wrap;
   background: #f1f4f8;
   border-bottom: 2px solid #dde3ea;
+  gap: 0;
 }
 
 .method-tab {
   flex: 1 1 0;
   min-width: 140px;
-  padding: 0.65rem 0.75rem;
+  padding: 0.75rem 0.75rem;
   border: none;
   background: transparent;
   font: inherit;
-  font-size: 0.78rem;
+  font-size: 0.82rem;
   font-weight: 600;
   color: #555;
   cursor: pointer;
-  text-align: center;
-  transition: background 0.15s, color 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
   border-bottom: 3px solid transparent;
   margin-bottom: -2px;
+  position: relative;
 }
 
 .method-tab:hover {
@@ -696,6 +740,42 @@
   border-bottom-color: #2596be;
 }
 
+.method-tab--incomplete:not(.method-tab--active) {
+  border-bottom-color: #e8a838;
+}
+
+.method-tab--complete:not(.method-tab--active) {
+  border-bottom-color: #27ae60;
+}
+
+.tab-step-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  font-size: 0.72rem;
+  font-weight: 800;
+  flex-shrink: 0;
+  background: #dde3ea;
+  color: #555;
+}
+
+.method-tab--active .tab-step-number {
+  background: #2596be;
+  color: #fff;
+}
+
+.method-tab--complete .tab-step-number {
+  background: #27ae60;
+  color: #fff;
+}
+
+.tab-label {
+  white-space: nowrap;
+}
+
 .tab-badge {
   display: inline-flex;
   align-items: center;
@@ -705,18 +785,18 @@
   border-radius: 50%;
   font-size: 0.65rem;
   font-weight: 700;
-  margin-left: 0.35rem;
   flex-shrink: 0;
 }
 
 .tab-badge--done {
-  background: #2596be;
+  background: #27ae60;
   color: #fff;
 }
 
 .tab-badge--pending {
-  background: #dde3ea;
-  color: #666;
+  background: transparent;
+  color: #e8a838;
+  font-size: 0.5rem;
 }
 
 .method-tab-content {
@@ -739,6 +819,20 @@
 
 .method-info-box p:last-child {
   margin-bottom: 0;
+}
+
+.ntfp-species-box {
+  background: #f0faf4;
+  border: 1px solid #a7d7c5;
+  border-left: 4px solid #27ae60;
+  border-radius: 6px;
+  padding: 0.75rem 1rem;
+  margin: 0.75rem 0;
+}
+
+.ntfp-species-box h4 {
+  color: #1a7a42;
+  font-size: 0.95rem;
 }
 
 .ecological-conditions {
@@ -962,6 +1056,14 @@
 
 .cost-distribution-header .cost-distribution-label {
   margin: 0;
+}
+
+.cost-distribution-hint {
+  font-size: 0.82rem;
+  color: #5a6a7a;
+  font-style: italic;
+  margin: 0.15rem 0 0.5rem;
+  line-height: 1.5;
 }
 
 /* Pie chart wrapper */
@@ -1425,6 +1527,20 @@
   gap: 0.5rem;
 }
 
+.cost-timeline-add-row {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+}
+
+.cost-timeline-add-hint {
+  font-size: 0.8rem;
+  color: #5a6a7a;
+  font-style: italic;
+  line-height: 1.4;
+}
+
 .cost-timeline-add {
   padding: 0.4rem 0.85rem;
   background: #2596be;
@@ -1435,6 +1551,7 @@
   font-weight: 600;
   cursor: pointer;
   transition: background 0.15s;
+  white-space: nowrap;
 }
 
 .cost-timeline-add:hover {
@@ -1468,6 +1585,36 @@
   border: none;
   border-top: 1px solid #d9e4ef;
   margin: 1.5rem 0 0;
+}
+
+/* NTFP Revenue section */
+.ntfp-revenue-section {
+  background: #f0faf4;
+  border: 1px solid #a7d7c5;
+  border-left: 4px solid #27ae60;
+  border-radius: 6px;
+  padding: 0.75rem 1rem 1rem;
+  margin-top: 0.75rem;
+}
+
+.revenue-timeline-builder .cost-timeline-builder {
+  border-color: #a7d7c5;
+}
+
+.revenue-add-btn {
+  background: #27ae60 !important;
+}
+
+.revenue-add-btn:hover {
+  background: #1a7a42 !important;
+}
+
+.productivity-add-btn {
+  background: #b45309 !important;
+}
+
+.productivity-add-btn:hover {
+  background: #92400e !important;
 }
 
 /* Illustration placeholder */
