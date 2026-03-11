@@ -163,6 +163,7 @@ function randConstraint() {
   return {
     cost: rand(50, 2000),
     occurrences: randInt(1, 10),
+    firebreakArea: 0,
     distribution: dist,
   };
 }
@@ -225,7 +226,7 @@ export function generateTestData(): RestorationModelFormData {
       seedling_planting_ntfp: randMethodEntry(true),
     },
     contextVariables: {
-      fireRisk: randConstraint(),
+      fireRisk: { ...randConstraint(), firebreakArea: rand(10, 200) },
       grazingPressure: randConstraint(),
       invasiveSpeciesPressure: randConstraint(),
     },

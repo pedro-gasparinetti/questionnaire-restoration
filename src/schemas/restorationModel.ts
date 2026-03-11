@@ -105,6 +105,11 @@ export const contextConstraintEntrySchema = z.object({
     .number({ message: "Number of occurrences is required" })
     .int("Must be a whole number")
     .min(0, "Cannot be negative"),
+  firebreakArea: z
+    .number()
+    .min(0, "Cannot be negative")
+    .optional()
+    .default(0),
   distribution: costDistributionSchema,
 });
 

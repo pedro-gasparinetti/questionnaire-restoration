@@ -212,6 +212,7 @@ export const EMPTY_SCENARIO_COSTS = {
 export const EMPTY_CONTEXT_CONSTRAINT = {
   cost: 0,
   occurrences: 0,
+  firebreakArea: 0,
   distribution: { labor: 0, materials: 0, machinery: 0 },
 };
 

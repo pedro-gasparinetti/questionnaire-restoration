@@ -87,6 +87,8 @@ export interface ContextConstraintEntry {
   cost: number;
   /** Number of times this activity needs to occur over the 20-year horizon */
   occurrences: number;
+  /** Average total area that needs firebreaks in one property (ha) — only for fireRisk */
+  firebreakArea?: number;
   /** Factor-of-production distribution (labor / machinery / materials, must sum to 100%) */
   distribution: FactorShares;
 }

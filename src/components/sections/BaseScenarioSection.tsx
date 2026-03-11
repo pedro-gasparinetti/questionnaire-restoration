@@ -59,7 +59,7 @@ export function CostEstimatesSection() {
                 : "Consider the total number of times this activity will need to occur over the 20-year project horizon (including both implementation and maintenance phases)."}
             </p>
 
-            <div className="form-grid" style={{ maxWidth: "480px" }}>
+            <div className={`form-grid${c.key === "fireRisk" ? " form-grid--3" : ""}`} style={{ maxWidth: c.key === "fireRisk" ? "720px" : "480px" }}>
               <FormField
                 label="Unit Cost"
                 unit={c.unit}
@@ -70,7 +70,7 @@ export function CostEstimatesSection() {
                 error={ctxErrors?.[c.key]?.cost}
               />
               <FormField
-                label={c.key === "grazingPressure" ? "Average total area that needs to have fences installed (ha)" : "Number of occurrences"}
+                label={c.key === "grazingPressure" ? "Average total area that needs to have fences installed" : "Number of occurrences"}
                 unit={c.key === "grazingPressure" ? "ha" : "times"}
                 type="number"
                 min="0"
@@ -79,6 +79,18 @@ export function CostEstimatesSection() {
                 registration={register(`contextVariables.${c.key}.occurrences`, { valueAsNumber: true })}
                 error={ctxErrors?.[c.key]?.occurrences}
               />
+              {c.key === "fireRisk" && (
+                <FormField
+                  label="Average total area that needs to have fire breaks in one property"
+                  unit="ha"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  placeholder="e.g., 50"
+                  registration={register(`contextVariables.fireRisk.firebreakArea`, { valueAsNumber: true })}
+                  error={ctxErrors?.fireRisk?.firebreakArea}
+                />
+              )}
             </div>
             {c.unitWarning && (
               <p className="unit-warning" style={{ color: "#b45309", fontSize: "0.82rem", margin: "0.25rem 0 0.5rem", fontStyle: "italic" }}>

@@ -93,6 +93,7 @@ interface MethodSummary {
     unit: string;
     unitCost: number;
     occurrences: number;
+    firebreakArea?: number;
     totalCost: number;
     distribution: FactorShares;
   }[];
@@ -149,6 +150,7 @@ export function SummaryValidationSection(_props: Props) {
           unit: meta.unit,
           unitCost,
           occurrences,
+          firebreakArea: k === "fireRisk" ? (Number(c.firebreakArea) || 0) : undefined,
           totalCost: unitCost * occurrences,
           distribution: c.distribution ?? { labor: 0, materials: 0, machinery: 0 },
         };
@@ -232,7 +234,7 @@ function MethodSummaryBlock({ summary: m }: { summary: MethodSummary }) {
       {/* Section 2 — Context Constraints & Additional Costs */}
       <SummaryTable
         caption="Context Constraints &amp; Additional Costs"
-        headers={["Constraint", "Unit Cost", "Occurrences / Area", "Total Cost"]}
+        headers={["Constraint", "Unit Cost", "Occurrences / Area", "Firebreak Area (ha)", "Total Cost"]}
         rows={[
           ...m.constraints.map((c) => ({
             label: c.label,
@@ -243,12 +245,13 @@ function MethodSummaryBlock({ summary: m }: { summary: MethodSummary }) {
                   ? `${c.occurrences} ha`
                   : `${c.occurrences}`
                 : "—",
+              c.key === "fireRisk" && c.firebreakArea ? `${c.firebreakArea} ha` : "—",
               c.totalCost > 0 ? formatUSD(c.totalCost) : "—",
             ],
           })),
           {
             label: "Total Additional Cost",
-            values: ["", "", formatUSD(m.totalAdditional)],
+            values: ["", "", "", formatUSD(m.totalAdditional)],
             className: "summary-table-total",
           },
         ]}

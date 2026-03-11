@@ -8,7 +8,7 @@
 import { Download } from "lucide-react";
 import type { RestorationModelFormData } from "../schemas";
 import type { RestorationModel } from "../types";
-import { exportToJsonFile, exportToCsvFile, generateExportFilename } from "../utils";
+import { generateExportFilename } from "../utils";
 import { exportToXlsxFile } from "../utils/storage";
 import { getMethodLabel } from "../constants";
 
@@ -20,16 +20,6 @@ interface Props {
 
 export function ExportButton({ data, disabled, onDisabledClick }: Props) {
   const filename = generateExportFilename(data.ecosystem, getMethodLabel(data.methodType));
-
-  const handleJson = () => {
-    if (disabled) { onDisabledClick?.(); return; }
-    exportToJsonFile(data, filename);
-  };
-
-  const handleCsv = () => {
-    if (disabled) { onDisabledClick?.(); return; }
-    exportToCsvFile(data, filename.replace(/\.json$/, ".csv"));
-  };
 
   const handleXlsx = () => {
     if (disabled) { onDisabledClick?.(); return; }
@@ -44,20 +34,6 @@ export function ExportButton({ data, disabled, onDisabledClick }: Props) {
         onClick={handleXlsx}
       >
         <Download size={16} /> Export Excel
-      </button>
-      <button
-        type="button"
-        className={`btn btn--primary${disabled ? " btn--faded" : ""}`}
-        onClick={handleJson}
-      >
-        <Download size={16} /> Export JSON
-      </button>
-      <button
-        type="button"
-        className={`btn btn--secondary${disabled ? " btn--faded" : ""}`}
-        onClick={handleCsv}
-      >
-        <Download size={16} /> Export CSV
       </button>
     </div>
   );
