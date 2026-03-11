@@ -180,7 +180,7 @@ function buildSharedColumns(d: RestorationModel): Row {
     if (!c) continue;
 
     row[`${s}_UnitCost`] = c.cost ?? 0;
-    row[`${s}_Occur`] = c.occurrences ?? 0;
+    row[ck === "grazingPressure" ? `${s}_Area_ha` : `${s}_Occur`] = c.occurrences ?? 0;
     row[`${s}_TotalCost`] = (c.cost ?? 0) * (c.occurrences ?? 0);
     row[`${s}_Labor_%`] = c.distribution?.labor ?? 0;
     row[`${s}_Mater_%`] = c.distribution?.materials ?? 0;

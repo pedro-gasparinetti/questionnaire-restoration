@@ -232,13 +232,17 @@ function MethodSummaryBlock({ summary: m }: { summary: MethodSummary }) {
       {/* Section 2 — Context Constraints & Additional Costs */}
       <SummaryTable
         caption="Context Constraints &amp; Additional Costs"
-        headers={["Constraint", "Unit Cost", "Occurrences", "Total Cost"]}
+        headers={["Constraint", "Unit Cost", "Occurrences / Area", "Total Cost"]}
         rows={[
           ...m.constraints.map((c) => ({
             label: c.label,
             values: [
               c.unitCost > 0 ? `${fmt(c.unitCost)} ${c.unit}` : "—",
-              c.occurrences > 0 ? `${c.occurrences}` : "—",
+              c.occurrences > 0
+                ? c.key === "grazingPressure"
+                  ? `${c.occurrences} ha`
+                  : `${c.occurrences}`
+                : "—",
               c.totalCost > 0 ? formatUSD(c.totalCost) : "—",
             ],
           })),

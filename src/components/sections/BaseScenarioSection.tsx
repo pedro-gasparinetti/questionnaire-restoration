@@ -54,7 +54,9 @@ export function CostEstimatesSection() {
             <h4 className="constraint-card-title">{c.label}</h4>
 
             <p className="form-hint" style={{ marginBottom: "0.75rem", fontSize: "0.85rem" }}>
-              Consider the total number of times this activity will need to occur over the 20-year project horizon (including both implementation and maintenance phases).
+              {c.key === "grazingPressure"
+                ? "Consider the linear cost (1000m) and the total area of each lot that probably will need to be fenced (ha)."
+                : "Consider the total number of times this activity will need to occur over the 20-year project horizon (including both implementation and maintenance phases)."}
             </p>
 
             <div className="form-grid" style={{ maxWidth: "480px" }}>
@@ -68,12 +70,12 @@ export function CostEstimatesSection() {
                 error={ctxErrors?.[c.key]?.cost}
               />
               <FormField
-                label="Number of occurrences"
-                unit="times"
+                label={c.key === "grazingPressure" ? "Average total area that needs to have fences installed (ha)" : "Number of occurrences"}
+                unit={c.key === "grazingPressure" ? "ha" : "times"}
                 type="number"
                 min="0"
-                step="1"
-                placeholder="e.g., 5"
+                step={c.key === "grazingPressure" ? "0.01" : "1"}
+                placeholder={c.key === "grazingPressure" ? "e.g., 10" : "e.g., 5"}
                 registration={register(`contextVariables.${c.key}.occurrences`, { valueAsNumber: true })}
                 error={ctxErrors?.[c.key]?.occurrences}
               />
