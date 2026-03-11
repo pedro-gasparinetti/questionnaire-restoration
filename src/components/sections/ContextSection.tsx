@@ -190,17 +190,17 @@ export function ContextSection() {
         </div>
 
         <div className="method-tab-content" key={activeTab}>
+          <div className="method-info-box">
+            {activeTabData.description.split("\n").map((line, i) => (
+              <p key={i}>{line}</p>
+            ))}
+          </div>
           <div className="illustration-placeholder">
             <img
               src="/assets/Restoration_example.png"
               alt="Restoration method illustration"
               className="method-illustration"
             />
-          </div>
-          <div className="method-info-box">
-            {activeTabData.description.split("\n").map((line, i) => (
-              <p key={i}>{line}</p>
-            ))}
           </div>
 
           {/* ── NTFP Species (only for NTFP tabs) ──────────────── */}

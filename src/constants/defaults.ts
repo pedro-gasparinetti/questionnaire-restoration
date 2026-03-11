@@ -29,7 +29,7 @@ export const METHOD_TABS = [
     id: "anr_30" as const,
     title: "ANR/50% Enrichment",
     description:
-      "This scenario assumes a slightly less favorable context, with minor soil degradation and moderate availability of natural regeneration sources.\nEnrichment planting is applied at 50% intensity to support regeneration and accelerate structural recovery.\nEnrichment intensity is fixed at 50%.",
+      "This scenario assumes a slightly less favorable context than a context for pure natural regeneration, with minor soil degradation and moderate availability of natural regeneration sources.\nEnrichment planting is applied at 50% intensity to support regeneration and accelerate structural recovery.\nEnrichment intensity is fixed at 50%.",
     implementationCostInfo:
       "Basic implementation cost should include the minimum cost required to initiate assisted natural regeneration under mildly restrictive conditions.\nThis includes all Natural Regeneration base activities plus localized enrichment planting at 50% intensity, including seedling acquisition, planting labor, and light localized soil correction.\nDo not include costs related to invasive species control, fencing, fire management, or other activities beside the basic implementation. These must be modeled as assistance costs.",
     maintenanceCostInfo:
