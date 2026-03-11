@@ -90,7 +90,11 @@ export function RestorationForm({ initialData, onSaved }: Props) {
           <button
             type="button"
             className="btn btn--secondary"
-            onClick={() => reset()}
+            onClick={() => {
+              if (window.confirm("Are you sure you want to reset the form? All unsaved data will be lost.")) {
+                reset();
+              }
+            }}
           >
             Reset Form
           </button>

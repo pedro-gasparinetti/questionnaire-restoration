@@ -185,7 +185,7 @@ export const restorationModelSchema = z.object({
   respondentName: z.string().optional().default(""),
   gpsCoordinates: z.string().optional().default(""),
   ecosystem: z.string().min(1, "Ecosystem is required"),
-  country: z.string().min(1, "Country is required"),
+  country: z.string().optional().default(""),
   city: z.string().optional().default(""),
   timeHorizon: z.literal(20).default(20),
 
