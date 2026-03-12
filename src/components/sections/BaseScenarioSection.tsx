@@ -15,6 +15,7 @@ const CONTEXT_CONSTRAINTS = [
   { key: "fireRisk" as const, label: "Firebreak / Fire Risk", unit: "US$/ha" },
   { key: "grazingPressure" as const, label: "Fencing / Grazing Pressure", unit: "US$/km", unitWarning: "⚠ Note: this cost is per kilometre of fence (1 km), not per hectare." },
   { key: "invasiveSpeciesPressure" as const, label: "Weed Control / Invasive Species Pressure", unit: "US$/ha" },
+  { key: "antInfestation" as const, label: "Ant Control / Ant Infestation Risk", unit: "US$/ha" },
 ];
 
 export function CostEstimatesSection() {

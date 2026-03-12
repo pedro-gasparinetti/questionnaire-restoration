@@ -229,6 +229,7 @@ export function generateTestData(): RestorationModelFormData {
       fireRisk: { ...randConstraint(), firebreakArea: rand(10, 200) },
       grazingPressure: randConstraint(),
       invasiveSpeciesPressure: randConstraint(),
+      antInfestation: randConstraint(),
     },
     selectedAssistances: selectedAssistances,
     favorableScenario: {

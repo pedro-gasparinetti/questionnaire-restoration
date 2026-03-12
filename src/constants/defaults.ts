@@ -234,6 +234,7 @@ export const DEFAULT_FORM_VALUES: RestorationModelFormData = {
     fireRisk: { ...EMPTY_CONTEXT_CONSTRAINT },
     grazingPressure: { ...EMPTY_CONTEXT_CONSTRAINT },
     invasiveSpeciesPressure: { ...EMPTY_CONTEXT_CONSTRAINT },
+    antInfestation: { ...EMPTY_CONTEXT_CONSTRAINT },
   },
   selectedAssistances: [],
   favorableScenario: { ...EMPTY_SCENARIO_COSTS },

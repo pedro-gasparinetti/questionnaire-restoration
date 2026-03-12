@@ -117,6 +117,7 @@ export const contextVariablesSchema = z.object({
   fireRisk: contextConstraintEntrySchema,
   grazingPressure: contextConstraintEntrySchema,
   invasiveSpeciesPressure: contextConstraintEntrySchema,
+  antInfestation: contextConstraintEntrySchema,
 });
 
 // ---------------------------------------------------------------------------

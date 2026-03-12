@@ -148,11 +148,12 @@ const METHOD_LABELS: Record<string, string> = {
   seedling_planting_ntfp: "Full Seedling Plantation (NTFP)",
 };
 
-const CONSTRAINT_KEYS = ["fireRisk", "grazingPressure", "invasiveSpeciesPressure"] as const;
+const CONSTRAINT_KEYS = ["fireRisk", "grazingPressure", "invasiveSpeciesPressure", "antInfestation"] as const;
 const CONSTRAINT_SHORT: Record<string, string> = {
   fireRisk: "Fire",
   grazingPressure: "Fence",
   invasiveSpeciesPressure: "Weed",
+  antInfestation: "Ant",
 };
 
 type Row = Record<string, string | number>;

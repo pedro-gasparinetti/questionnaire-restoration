@@ -105,6 +105,8 @@ export interface ContextVariables {
   grazingPressure: ContextConstraintEntry;
   /** Weed Control / Invasive Species Pressure */
   invasiveSpeciesPressure: ContextConstraintEntry;
+  /** Ant Control / Ant Infestation Risk */
+  antInfestation: ContextConstraintEntry;
 }
 
 // ---------------------------------------------------------------------------
