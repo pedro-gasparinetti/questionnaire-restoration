@@ -63,10 +63,12 @@ const METHOD_LABELS: Record<string, string> = {
 
 interface YearCashFlow {
   year: number;
+  projectYear: number;
   implCost: number;
   maintCost: number;
   constraintCost: number;
   totalCost: number;
+  ntfpProductivity: number;
   ntfpRevenue: number;
   carbonBenefit: number;
   totalBenefit: number;
@@ -131,6 +133,99 @@ function computeIRR(cashFlows: YearCashFlow[]): number | null {
   return isFinite(result) ? result : null;
 }
 
+function createYearMap(horizon: number): Record<number, number> {
+  const values: Record<number, number> = {};
+  for (let year = 1; year <= horizon; year++) {
+    values[year] = 0;
+  }
+  return values;
+}
+
+function addSegmentSeries(
+  yearMap: Record<number, number>,
+  segments: Array<{ yearFrom: number; yearTo: number }>,
+  getValue: (segment: { yearFrom: number; yearTo: number }, year: number) => number,
+  startYear = 2,
+): Record<number, number> {
+  for (const segment of segments) {
+    const from = Math.max(startYear, segment.yearFrom);
+    const to = Math.min(Object.keys(yearMap).length, segment.yearTo);
+    for (let year = from; year <= to; year++) {
+      yearMap[year] += getValue(segment, year);
+    }
+  }
+  return yearMap;
+}
+
+function buildMaintenanceCostMap(method: MethodCostEntry, horizon: number): Record<number, number> {
+  const maintenanceByYear = createYearMap(horizon);
+  const segments = method.maintenanceSegments ?? [];
+
+  if (segments.length > 0) {
+    return addSegmentSeries(maintenanceByYear, segments, (segment) => (segment as { cost?: number }).cost ?? 0);
+  }
+
+  const maintCostTotal = method.maintenanceCost || 0;
+  const intMaintStart = method.intensiveMaintenanceStartYear || 0;
+  const intMaintEnd = method.intensiveMaintenanceEndYear || 0;
+  const intMaintCost = method.intensiveMaintenanceCost || 0;
+  const maintYears = horizon - 1;
+  const intMaintYears = intMaintEnd >= intMaintStart ? intMaintEnd - intMaintStart + 1 : 0;
+  const normalMaintYears = Math.max(0, maintYears - intMaintYears);
+  const normalMaintTotal = Math.max(0, maintCostTotal - intMaintCost);
+  const normalMaintPerYear = normalMaintYears > 0 ? normalMaintTotal / normalMaintYears : 0;
+  const intMaintPerYear = intMaintYears > 0 ? intMaintCost / intMaintYears : 0;
+
+  for (let year = 2; year <= horizon; year++) {
+    maintenanceByYear[year] = intMaintYears > 0 && year >= intMaintStart && year <= intMaintEnd
+      ? intMaintPerYear
+      : normalMaintPerYear;
+  }
+
+  return maintenanceByYear;
+}
+
+function buildProductivityMap(method: MethodCostEntry, horizon: number): Record<number, number> {
+  const productivityByYear = createYearMap(horizon);
+  const segments = method.ntfpProductivitySegments ?? [];
+
+  if (segments.length > 0) {
+    return addSegmentSeries(productivityByYear, segments, (segment) => (segment as { productivity?: number }).productivity ?? 0);
+  }
+
+  for (let year = 2; year <= horizon; year++) {
+    productivityByYear[year] = method.ntfpProductivity || 0;
+  }
+
+  return productivityByYear;
+}
+
+function buildRevenueMap(method: MethodCostEntry, horizon: number): Record<number, number> {
+  const revenueByYear = createYearMap(horizon);
+  const revenueSegments = method.ntfpRevenueSegments ?? [];
+
+  if (revenueSegments.length > 0) {
+    return addSegmentSeries(revenueByYear, revenueSegments, (segment) => (segment as { revenue?: number }).revenue ?? 0);
+  }
+
+  const productivitySegments = method.ntfpProductivitySegments ?? [];
+  if (productivitySegments.length > 0 && (method.ntfpPrice || 0) > 0) {
+    const productivityByYear = buildProductivityMap(method, horizon);
+    for (let year = 2; year <= horizon; year++) {
+      revenueByYear[year] = productivityByYear[year] * (method.ntfpPrice || 0);
+    }
+    return revenueByYear;
+  }
+
+  const ntfpRevenueTotal = method.ntfpRevenue || 0;
+  const ntfpRevenueYears = Math.max(1, horizon - NTFP_LAG_YEARS);
+  const ntfpPerYear = ntfpRevenueTotal / ntfpRevenueYears;
+  for (let year = NTFP_LAG_YEARS + 1; year <= horizon; year++) {
+    revenueByYear[year] = ntfpPerYear;
+  }
+  return revenueByYear;
+}
+
 /**
  * Build 20-year cash flow for one method.
  */
@@ -141,24 +236,12 @@ function buildCashFlows(
   discountRate: number,
 ): YearCashFlow[] {
   const horizon = data.timeHorizon || 20;
+  const maintYears = horizon - 1;
   const flows: YearCashFlow[] = [];
 
   // --- COSTS ---
   const implCostTotal = method.implementationCost || 0;
-  const maintCostTotal = method.maintenanceCost || 0;
-  const intMaintStart = method.intensiveMaintenanceStartYear || 0;
-  const intMaintEnd = method.intensiveMaintenanceEndYear || 0;
-  const intMaintCost = method.intensiveMaintenanceCost || 0;
-
-  // Distribute maintenance: intensive years get proportionally more
-  const maintYears = horizon - 1; // years 1..19
-  const intMaintYears = intMaintEnd > intMaintStart ? intMaintEnd - intMaintStart + 1 : 0;
-  const normalMaintYears = maintYears - intMaintYears;
-
-  // Intensive maintenance cost is part of total maintenance
-  const normalMaintTotal = Math.max(0, maintCostTotal - intMaintCost);
-  const normalMaintPerYear = normalMaintYears > 0 ? normalMaintTotal / normalMaintYears : 0;
-  const intMaintPerYear = intMaintYears > 0 ? intMaintCost / intMaintYears : 0;
+  const maintenanceByYear = buildMaintenanceCostMap(method, horizon);
 
   // --- CONSTRAINT COSTS (distribute over horizon) ---
   const ctx = data.contextVariables;
@@ -179,10 +262,8 @@ function buildCashFlows(
 
   // --- BENEFITS ---
   const isNtfp = methodId.endsWith("_ntfp");
-  const ntfpRevenueTotal = isNtfp ? (method.ntfpRevenue || 0) : 0;
-  // Annualize NTFP revenue over revenue-producing years
-  const ntfpRevenueYears = Math.max(1, horizon - NTFP_LAG_YEARS);
-  const ntfpPerYear = ntfpRevenueTotal / ntfpRevenueYears;
+  const productivityByYear = isNtfp ? buildProductivityMap(method, horizon) : createYearMap(horizon);
+  const revenueByYear = isNtfp ? buildRevenueMap(method, horizon) : createYearMap(horizon);
 
   const baseCarbon = getCarbon(data.ecosystem);
   const carbonMult = METHOD_CARBON_MULT[methodId] || 0.75;
@@ -195,24 +276,16 @@ function buildCashFlows(
   for (let t = 0; t < horizon; t++) {
     const isImpl = t === 0;
     const implCost = isImpl ? implCostTotal : 0;
-
-    let maintCost = 0;
-    if (t > 0) {
-      const yr = t + 1; // year number (1-based for matching intMaint range)
-      if (intMaintYears > 0 && yr >= intMaintStart && yr <= intMaintEnd) {
-        maintCost = intMaintPerYear;
-      } else {
-        maintCost = normalMaintPerYear;
-      }
-    }
+    const yearNumber = t + 1;
+    const maintCost = t > 0 ? maintenanceByYear[yearNumber] || 0 : 0;
 
     const constraintCost =
       (isImpl ? fenceYear0 : fencePerYearMaint) + firePerYear + weedPerYear + antPerYear;
 
     const totalCost = implCost + maintCost + constraintCost;
 
-    // NTFP revenue starts after lag
-    const ntfpRev = isNtfp && t >= NTFP_LAG_YEARS ? ntfpPerYear : 0;
+    const ntfpProductivity = isNtfp ? productivityByYear[yearNumber] || 0 : 0;
+    const ntfpRev = isNtfp ? revenueByYear[yearNumber] || 0 : 0;
 
     // Carbon benefit ramps linearly
     const carbonSeqThisYear = carbonPeak * Math.min(1, (t + 1) / 10);
@@ -228,10 +301,12 @@ function buildCashFlows(
 
     flows.push({
       year: t,
+      projectYear: yearNumber,
       implCost,
       maintCost,
       constraintCost,
       totalCost,
+      ntfpProductivity,
       ntfpRevenue: ntfpRev,
       carbonBenefit: carbonBen,
       totalBenefit,
@@ -268,7 +343,7 @@ function computeMethodCBA(
   const bcr = totalCosts > 0 ? totalBenefits / totalCosts : 0;
 
   // Payback: first year where cumulative discounted net >= 0
-  const paybackYear = cashFlows.find((cf) => cf.cumulativeDiscountedNet >= 0)?.year ?? null;
+  const paybackYear = cashFlows.find((cf) => cf.cumulativeDiscountedNet >= 0)?.projectYear ?? null;
 
   const carbonSeqRate = getCarbon(data.ecosystem) * (METHOD_CARBON_MULT[methodId] || 0.75);
   const totalCarbonPV = cashFlows.reduce(
@@ -419,11 +494,13 @@ export function exportCBAToXlsx(data: RestorationModel, filename: string): void 
   // ── Sheet 3+: Cash Flow per method ───────────────────────────────────
   for (const r of results) {
     const cfHeaders = [
-      "Year",
+      "Discount Period",
+      "Project Year",
       "Implementation Cost",
       "Maintenance Cost",
       "Constraint Cost",
       "Total Cost",
+      "NTFP Productivity",
       "NTFP Revenue",
       "Carbon Benefit",
       "Total Benefits",
@@ -435,10 +512,12 @@ export function exportCBAToXlsx(data: RestorationModel, filename: string): void 
 
     const cfRows = r.cashFlows.map((cf) => [
       cf.year,
+      cf.projectYear,
       fmt(cf.implCost),
       fmt(cf.maintCost),
       fmt(cf.constraintCost),
       fmt(cf.totalCost),
+      fmt(cf.ntfpProductivity),
       fmt(cf.ntfpRevenue),
       fmt(cf.carbonBenefit),
       fmt(cf.totalBenefit),

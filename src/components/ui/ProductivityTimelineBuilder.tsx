@@ -7,21 +7,16 @@
  * The weighted average is propagated via `onAverageChange`.
  */
 
-import { useState, useId } from "react";
+import { useId } from "react";
+import type { ProductivitySegment } from "../../types";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
-
-export interface ProductivitySegment {
-  id: string;
-  label: string;
-  yearFrom: number;
-  yearTo: number;
-  productivity: number;
-}
 
 interface Props {
   startYear?: number;
   maxYear?: number;
+  value: ProductivitySegment[];
+  onChange: (segments: ProductivitySegment[]) => void;
   onAverageChange: (weightedAvg: number) => void;
 }
 
@@ -143,9 +138,9 @@ function Legend({ segments }: { segments: ProductivitySegment[] }) {
 
 // ─── Main ───────────────────────────────────────────────────────────────────
 
-export function ProductivityTimelineBuilder({ startYear = 2, maxYear = 20, onAverageChange }: Props) {
+export function ProductivityTimelineBuilder({ startYear = 2, maxYear = 20, value, onChange, onAverageChange }: Props) {
   const uid = useId();
-  const [segments, setSegments] = useState<ProductivitySegment[]>([]);
+  const segments = value;
 
   const computeWeightedAvg = (segs: ProductivitySegment[]) => {
     let totalYears = 0;
@@ -159,7 +154,7 @@ export function ProductivityTimelineBuilder({ startYear = 2, maxYear = 20, onAve
   };
 
   const update = (updated: ProductivitySegment[]) => {
-    setSegments(updated);
+    onChange(updated);
     onAverageChange(computeWeightedAvg(updated));
   };
 

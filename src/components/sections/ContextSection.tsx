@@ -18,7 +18,7 @@ import { useFormContext } from "react-hook-form";
 import type { RestorationModelFormData } from "../../schemas";
 import { CollapsibleSection, FormField, InfoBox, CostTimelineBuilder, RevenueTimelineBuilder, ProductivityTimelineBuilder, DistributionPie } from "../ui";
 import { METHOD_TABS } from "../../constants";
-import type { MethodType } from "../../types";
+import type { CostSegment, MethodType, ProductivitySegment, RevenueSegment } from "../../types";
 import { Sprout } from "lucide-react";
 
 export function ContextSection() {
@@ -49,6 +49,9 @@ export function ContextSection() {
   const maintMat    = watch(`methodCosts.${activeTab}.maintenanceDistribution.materials`);
   const implCostVal    = watch(`methodCosts.${activeTab}.implementationCost`) ?? 0;
   const maintCostVal   = watch(`methodCosts.${activeTab}.maintenanceCost`) ?? 0;
+  const maintenanceSegments = watch(`methodCosts.${activeTab}.maintenanceSegments`) ?? [];
+  const ntfpProductivitySegments = watch(`methodCosts.${activeTab}.ntfpProductivitySegments`) ?? [];
+  const ntfpRevenueSegments = watch(`methodCosts.${activeTab}.ntfpRevenueSegments`) ?? [];
 
   const implSum  = (Number(implLabor) || 0) + (Number(implMach) || 0) + (Number(implMat) || 0);
   const maintSum = (Number(maintLabor) || 0) + (Number(maintMach) || 0) + (Number(maintMat) || 0);
@@ -321,6 +324,10 @@ export function ContextSection() {
             key={activeTab}
             startYear={2}
             maxYear={20}
+            value={maintenanceSegments}
+            onChange={(segments: CostSegment[]) =>
+              setValue(`methodCosts.${activeTab}.maintenanceSegments`, segments, { shouldDirty: true })
+            }
             onTotalChange={(total) =>
               setValue(`methodCosts.${activeTab}.maintenanceCost`, total, { shouldDirty: true })
             }
@@ -411,6 +418,10 @@ export function ContextSection() {
                     key={`prod-${activeTab}`}
                     startYear={2}
                     maxYear={20}
+                    value={ntfpProductivitySegments}
+                    onChange={(segments: ProductivitySegment[]) =>
+                      setValue(`methodCosts.${activeTab}.ntfpProductivitySegments`, segments, { shouldDirty: true })
+                    }
                     onAverageChange={(avg) =>
                       setValue(`methodCosts.${activeTab}.ntfpProductivity`, avg, { shouldDirty: true })
                     }
@@ -439,6 +450,10 @@ export function ContextSection() {
                   key={`rev-${activeTab}`}
                   startYear={2}
                   maxYear={20}
+                  value={ntfpRevenueSegments}
+                  onChange={(segments: RevenueSegment[]) =>
+                    setValue(`methodCosts.${activeTab}.ntfpRevenueSegments`, segments, { shouldDirty: true })
+                  }
                   onTotalChange={(total) =>
                     setValue(`methodCosts.${activeTab}.ntfpRevenue`, total, { shouldDirty: true })
                   }

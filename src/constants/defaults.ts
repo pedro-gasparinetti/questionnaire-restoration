@@ -181,6 +181,9 @@ export const EMPTY_METHOD_COST_ENTRY = {
   ntfpProductivity: 0,
   ntfpPrice: 0,
   ntfpRevenue: 0,
+  maintenanceSegments: [],
+  ntfpProductivitySegments: [],
+  ntfpRevenueSegments: [],
 };
 
 /** Default empty method costs for all tabs */
