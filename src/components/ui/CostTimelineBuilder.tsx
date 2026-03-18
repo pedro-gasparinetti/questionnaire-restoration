@@ -186,10 +186,19 @@ export function CostTimelineBuilder({ startYear = 2, maxYear = 20, value, onChan
 
             <div className="cost-timeline-field cost-timeline-field--label">
               <label className="cost-timeline-input-label">Name</label>
-              <input type="text" className="cost-timeline-input"
-                placeholder={`Segment ${i + 1}`}
+              <select
+                className="cost-timeline-input"
                 value={seg.label}
-                onChange={(e) => patch(seg.id, { label: e.target.value })} />
+                onChange={(e) => patch(seg.id, { label: e.target.value })}
+              >
+                <option value="">Select activity...</option>
+                <option value="Survival checks">Survival checks</option>
+                <option value="Limited replacement of failed enriched seedlings">Limited replacement of failed enriched seedlings</option>
+                <option value="NTFP harvesting">NTFP harvesting</option>
+                <option value="Light monitoring activities">Light monitoring activities</option>
+                <option value="Maintenance of regenerating individuals">Maintenance of regenerating individuals</option>
+                <option value="Maintenance of NTFP species">Maintenance of NTFP species</option>
+              </select>
             </div>
 
             <div className="cost-timeline-field cost-timeline-field--year">
