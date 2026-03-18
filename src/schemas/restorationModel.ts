@@ -271,6 +271,10 @@ export const restorationModelSchema = z.object({
       .number({ message: "Hired labor cost is required" })
       .min(0, "Cannot be negative")
       .default(0),
+    machineryUnitCostPerHour: z
+      .number({ message: "Machinery unit cost is required" })
+      .min(0, "Cannot be negative")
+      .default(0),
     genderDistribution: z.object({
       male:   z.number({ message: "Male % is required" }).min(0, "Cannot be negative").max(100, "Cannot exceed 100%").default(0),
       female: z.number({ message: "Female % is required" }).min(0, "Cannot be negative").max(100, "Cannot exceed 100%").default(0),

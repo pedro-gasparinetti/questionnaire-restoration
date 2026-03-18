@@ -87,7 +87,7 @@ export const METHOD_TABS = [
     id: "seed_dispersal_ntfp" as const,
     title: "Seed Dispersal (with NTFP)",
     description:
-      "Same ecological scenario as Seed Dispersal, but includes Non-Timber Forest Product (NTFP) harvesting as part of the maintenance activities.\nApproach to cover 100% of the area.\nInclude any additional costs or savings associated with NTFP collection and management.",
+      "Same ecological scenario as Seed Dispersal, but includes Non-Timber Forest Product (NTFP) harvesting as part of the maintenance activities.\nApproach to cover 100% of the area, being NTFP 50% on average.\nInclude any additional costs associated with NTFP collection and management.",
     implementationCostInfo:
       "Basic implementation cost should reflect the minimum cost required to implement direct seeding under moderately restrictive ecological conditions, considering NTFP species.\nThis includes seed acquisition (including NTFP species), seed treatment (if applicable), light surface soil preparation, and seed distribution.\nDo not include fencing, invasive species control, firebreak construction, pest control, or other external restriction-related costs. These items will be covered in the next section (additional context constraints).",
     maintenanceCostInfo:
@@ -121,9 +121,9 @@ export const METHOD_TABS = [
   },
   {
     id: "seedling_planting_ntfp" as const,
-    title: "Full Seedling Plantation with NTFP (agroforestry)",
+    title: "Full Seedling Plantation NTFP (agroforestry)",
     description:
-      "Same ecological scenario as Full Seedling Plantation, but includes Non-Timber Forest Product (NTFP) harvesting as part of the maintenance activities.\nApproach to cover 100% of the area.\nInclude any additional costs or savings associated with NTFP collection and management.",
+      "Same ecological scenario as Full Seedling Plantation, but includes Non-Timber Forest Product (NTFP) harvesting as part of the maintenance activities.\nApproach to cover 100% of the area, with NTFP covering 50% on average.\nInclude any additional costs associated with NTFP collection and management.",
     implementationCostInfo:
       "Basic implementation cost should reflect the minimum cost required to establish full seedling planting under degraded soil and low propagule availability, considering NTFP species.\nThis includes seedling production or acquisition (including NTFP species), transport, standard soil preparation, planting labor, and basic fertilization at planting.\nDo not include erosion control infrastructure, invasive species management, fencing, irrigation systems, or other external constraint-related costs. These items will be covered in the next section (additional context constraints).",
     maintenanceCostInfo:
@@ -249,6 +249,7 @@ export const DEFAULT_FORM_VALUES: RestorationModelFormData = {
     implementation: { hiredLabor: 0, familyLabor: 0 },
     maintenance: { hiredLabor: 0, familyLabor: 0 },
     hiredLaborCostPerDay: 0,
+    machineryUnitCostPerHour: 0,
     genderDistribution: { male: 0, female: 0, other: 0 },
   },
 };

@@ -720,7 +720,7 @@
   color: #555;
   cursor: pointer;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
   gap: 0.4rem;
   transition: background 0.15s, color 0.15s, border-color 0.15s;
@@ -760,6 +760,7 @@
   flex-shrink: 0;
   background: #dde3ea;
   color: #555;
+  margin-top: 0.1rem;
 }
 
 .method-tab--active .tab-step-number {
@@ -773,7 +774,9 @@
 }
 
 .tab-label {
-  white-space: nowrap;
+  white-space: normal;
+  text-align: center;
+  line-height: 1.3;
 }
 
 .tab-badge {
