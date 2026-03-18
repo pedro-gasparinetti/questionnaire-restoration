@@ -15,6 +15,7 @@ const CONTEXT_CONSTRAINTS = [
   { key: "fireRisk" as const, label: "Firebreak / Fire Risk", unit: "US$/ha" },
   { key: "grazingPressure" as const, label: "Fencing / Grazing Pressure", unit: "US$/km", unitWarning: "⚠ Note: this cost is per kilometre of fence (1 km), not per hectare." },
   { key: "invasiveSpeciesPressure" as const, label: "Weed Control / Invasive Species Pressure", unit: "US$/ha" },
+  { key: "antInfestation" as const, label: "Ant Control / Ant Infestation Risk", unit: "US$/ha" },
 ];
 
 export function CostEstimatesSection() {
@@ -54,10 +55,12 @@ export function CostEstimatesSection() {
             <h4 className="constraint-card-title">{c.label}</h4>
 
             <p className="form-hint" style={{ marginBottom: "0.75rem", fontSize: "0.85rem" }}>
-              Consider the total number of times this activity will need to occur over the 20-year project horizon (including both implementation and maintenance phases).
+              {c.key === "grazingPressure"
+                ? "Consider the linear cost (1000m) and the total area of each lot that probably will need to be fenced (ha)."
+                : "Consider the total number of times this activity will need to occur over the 20-year project horizon (including both implementation and maintenance phases)."}
             </p>
 
-            <div className="form-grid" style={{ maxWidth: "480px" }}>
+            <div className={`form-grid${c.key === "fireRisk" ? " form-grid--3" : ""}`} style={{ maxWidth: c.key === "fireRisk" ? "720px" : "480px" }}>
               <FormField
                 label="Unit Cost"
                 unit={c.unit}
@@ -68,15 +71,27 @@ export function CostEstimatesSection() {
                 error={ctxErrors?.[c.key]?.cost}
               />
               <FormField
-                label="Number of occurrences"
-                unit="times"
+                label={c.key === "grazingPressure" ? "Average total area that needs to have fences installed" : "Number of occurrences"}
+                unit={c.key === "grazingPressure" ? "ha" : "times"}
                 type="number"
                 min="0"
-                step="1"
-                placeholder="e.g., 5"
+                step={c.key === "grazingPressure" ? "0.01" : "1"}
+                placeholder={c.key === "grazingPressure" ? "e.g., 10" : "e.g., 5"}
                 registration={register(`contextVariables.${c.key}.occurrences`, { valueAsNumber: true })}
                 error={ctxErrors?.[c.key]?.occurrences}
               />
+              {c.key === "fireRisk" && (
+                <FormField
+                  label="Average total area that needs to have fire breaks in one property"
+                  unit="ha"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  placeholder="e.g., 50"
+                  registration={register(`contextVariables.fireRisk.firebreakArea`, { valueAsNumber: true })}
+                  error={ctxErrors?.fireRisk?.firebreakArea}
+                />
+              )}
             </div>
             {c.unitWarning && (
               <p className="unit-warning" style={{ color: "#b45309", fontSize: "0.82rem", margin: "0.25rem 0 0.5rem", fontStyle: "italic" }}>

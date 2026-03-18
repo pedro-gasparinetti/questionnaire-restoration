@@ -7,21 +7,16 @@
  * The sum of all segments is propagated via `onTotalChange`.
  */
 
-import { useState, useId } from "react";
+import { useId } from "react";
+import type { RevenueSegment } from "../../types";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
-
-export interface RevenueSegment {
-  id: string;
-  label: string;
-  yearFrom: number;
-  yearTo: number;
-  revenue: number;
-}
 
 interface Props {
   startYear?: number;
   maxYear?: number;
+  value: RevenueSegment[];
+  onChange: (segments: RevenueSegment[]) => void;
   onTotalChange: (total: number) => void;
 }
 
@@ -40,6 +35,14 @@ const CH = VH - P.top  - P.bottom;
 
 function formatUSD(v: number) {
   return v.toLocaleString("en-US", { maximumFractionDigits: 0 });
+}
+
+function getSegmentSpan(segment: RevenueSegment) {
+  return Math.max(0, segment.yearTo - segment.yearFrom + 1);
+}
+
+function computeTotal(segments: RevenueSegment[]) {
+  return segments.reduce((sum, seg) => sum + getSegmentSpan(seg) * (Number(seg.revenue) || 0), 0);
 }
 
 // ─── Step-function line chart ───────────────────────────────────────────────
@@ -143,13 +146,13 @@ function Legend({ segments }: { segments: RevenueSegment[] }) {
 
 // ─── Main ───────────────────────────────────────────────────────────────────
 
-export function RevenueTimelineBuilder({ startYear = 2, maxYear = 20, onTotalChange }: Props) {
+export function RevenueTimelineBuilder({ startYear = 2, maxYear = 20, value, onChange, onTotalChange }: Props) {
   const uid = useId();
-  const [segments, setSegments] = useState<RevenueSegment[]>([]);
+  const segments = value;
 
   const update = (updated: RevenueSegment[]) => {
-    setSegments(updated);
-    onTotalChange(updated.reduce((s, seg) => s + (Number(seg.revenue) || 0), 0));
+    onChange(updated);
+    onTotalChange(computeTotal(updated));
   };
 
   const add = () =>
@@ -159,7 +162,7 @@ export function RevenueTimelineBuilder({ startYear = 2, maxYear = 20, onTotalCha
   const patch  = (id: string, p: Partial<RevenueSegment>) =>
     update(segments.map((s) => (s.id === id ? { ...s, ...p } : s)));
 
-  const total = segments.reduce((s, seg) => s + (Number(seg.revenue) || 0), 0);
+  const total = computeTotal(segments);
 
   return (
     <div className="cost-timeline-builder revenue-timeline-builder">
@@ -241,7 +244,7 @@ export function RevenueTimelineBuilder({ startYear = 2, maxYear = 20, onTotalCha
           </span>
         </div>
         {segments.length > 0 && (
-          <span className="cost-timeline-total" style={{ color: "#27ae60" }}>Total: <strong>US$ {formatUSD(total)}/ha</strong></span>
+          <span className="cost-timeline-total" style={{ color: "#27ae60" }}>Accumulated total: <strong>US$ {formatUSD(total)}/ha</strong></span>
         )}
       </div>
     </div>

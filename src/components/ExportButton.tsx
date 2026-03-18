@@ -5,11 +5,12 @@
  * CSV: two-column flat table (Field, Value) with dot-notation keys.
  */
 
-import { Download } from "lucide-react";
+import { Download, BarChart3 } from "lucide-react";
 import type { RestorationModelFormData } from "../schemas";
 import type { RestorationModel } from "../types";
-import { exportToJsonFile, exportToCsvFile, generateExportFilename } from "../utils";
+import { generateExportFilename } from "../utils";
 import { exportToXlsxFile } from "../utils/storage";
+import { exportCBAToXlsx } from "../utils/cba";
 import { getMethodLabel } from "../constants";
 
 interface Props {
@@ -21,19 +22,19 @@ interface Props {
 export function ExportButton({ data, disabled, onDisabledClick }: Props) {
   const filename = generateExportFilename(data.ecosystem, getMethodLabel(data.methodType));
 
-  const handleJson = () => {
-    if (disabled) { onDisabledClick?.(); return; }
-    exportToJsonFile(data, filename);
-  };
-
-  const handleCsv = () => {
-    if (disabled) { onDisabledClick?.(); return; }
-    exportToCsvFile(data, filename.replace(/\.json$/, ".csv"));
-  };
-
   const handleXlsx = () => {
     if (disabled) { onDisabledClick?.(); return; }
     exportToXlsxFile(data as RestorationModel, filename.replace(/\.json$/, ".xlsx"));
+  };
+
+  const handleCBA = () => {
+    if (disabled) { onDisabledClick?.(); return; }
+    try {
+      exportCBAToXlsx(data as RestorationModel, filename.replace(/\.json$/, "_CBA.xlsx"));
+    } catch (err) {
+      console.error("CBA export error:", err);
+      alert("Error generating CBA report. Check the console for details.");
+    }
   };
 
   return (
@@ -47,17 +48,11 @@ export function ExportButton({ data, disabled, onDisabledClick }: Props) {
       </button>
       <button
         type="button"
-        className={`btn btn--primary${disabled ? " btn--faded" : ""}`}
-        onClick={handleJson}
+        className={`btn btn--success${disabled ? " btn--faded" : ""}`}
+        onClick={handleCBA}
+        style={{ background: "#0e7490", borderColor: "#0e7490" }}
       >
-        <Download size={16} /> Export JSON
-      </button>
-      <button
-        type="button"
-        className={`btn btn--secondary${disabled ? " btn--faded" : ""}`}
-        onClick={handleCsv}
-      >
-        <Download size={16} /> Export CSV
+        <BarChart3 size={16} /> Download CBA
       </button>
     </div>
   );

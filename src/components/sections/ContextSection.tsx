@@ -18,7 +18,7 @@ import { useFormContext } from "react-hook-form";
 import type { RestorationModelFormData } from "../../schemas";
 import { CollapsibleSection, FormField, InfoBox, CostTimelineBuilder, RevenueTimelineBuilder, ProductivityTimelineBuilder, DistributionPie } from "../ui";
 import { METHOD_TABS } from "../../constants";
-import type { MethodType } from "../../types";
+import type { CostSegment, MethodType, ProductivitySegment, RevenueSegment } from "../../types";
 import { Sprout } from "lucide-react";
 
 export function ContextSection() {
@@ -30,7 +30,6 @@ export function ContextSection() {
   } = useFormContext<RestorationModelFormData>();
 
   const currentMethodType = watch("methodType") || "anr_30";
-  const currentEnrichment = watch("enrichmentIntensity");
   const methodCosts = watch("methodCosts");
   const disabledMethods: MethodType[] = watch("disabledMethods") || [];
 
@@ -50,6 +49,9 @@ export function ContextSection() {
   const maintMat    = watch(`methodCosts.${activeTab}.maintenanceDistribution.materials`);
   const implCostVal    = watch(`methodCosts.${activeTab}.implementationCost`) ?? 0;
   const maintCostVal   = watch(`methodCosts.${activeTab}.maintenanceCost`) ?? 0;
+  const maintenanceSegments = watch(`methodCosts.${activeTab}.maintenanceSegments`) ?? [];
+  const ntfpProductivitySegments = watch(`methodCosts.${activeTab}.ntfpProductivitySegments`) ?? [];
+  const ntfpRevenueSegments = watch(`methodCosts.${activeTab}.ntfpRevenueSegments`) ?? [];
 
   const implSum  = (Number(implLabor) || 0) + (Number(implMach) || 0) + (Number(implMat) || 0);
   const maintSum = (Number(maintLabor) || 0) + (Number(maintMach) || 0) + (Number(maintMat) || 0);
@@ -95,10 +97,6 @@ export function ContextSection() {
       if (firstAvailable) handleTabChange(firstAvailable.id);
     }
   }, [disabledMethods]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  // Enrichment warning for ANR tab
-  const showEnrichmentWarning =
-    activeTab === "anr_30" && currentEnrichment > 50;
 
   // Check if a tab's costs have been filled (both > 0) and distributions sum to 100%
   const isTabComplete = (tabId: string): boolean => {
@@ -195,17 +193,17 @@ export function ContextSection() {
         </div>
 
         <div className="method-tab-content" key={activeTab}>
+          <div className="method-info-box">
+            {activeTabData.description.split("\n").map((line, i) => (
+              <p key={i}>{line}</p>
+            ))}
+          </div>
           <div className="illustration-placeholder">
             <img
               src="/assets/Restoration_example.png"
               alt="Restoration method illustration"
               className="method-illustration"
             />
-          </div>
-          <div className="method-info-box">
-            {activeTabData.description.split("\n").map((line, i) => (
-              <p key={i}>{line}</p>
-            ))}
           </div>
 
           {/* ── NTFP Species (only for NTFP tabs) ──────────────── */}
@@ -326,6 +324,10 @@ export function ContextSection() {
             key={activeTab}
             startYear={2}
             maxYear={20}
+            value={maintenanceSegments}
+            onChange={(segments: CostSegment[]) =>
+              setValue(`methodCosts.${activeTab}.maintenanceSegments`, segments, { shouldDirty: true })
+            }
             onTotalChange={(total) =>
               setValue(`methodCosts.${activeTab}.maintenanceCost`, total, { shouldDirty: true })
             }
@@ -416,6 +418,10 @@ export function ContextSection() {
                     key={`prod-${activeTab}`}
                     startYear={2}
                     maxYear={20}
+                    value={ntfpProductivitySegments}
+                    onChange={(segments: ProductivitySegment[]) =>
+                      setValue(`methodCosts.${activeTab}.ntfpProductivitySegments`, segments, { shouldDirty: true })
+                    }
                     onAverageChange={(avg) =>
                       setValue(`methodCosts.${activeTab}.ntfpProductivity`, avg, { shouldDirty: true })
                     }
@@ -444,6 +450,10 @@ export function ContextSection() {
                   key={`rev-${activeTab}`}
                   startYear={2}
                   maxYear={20}
+                  value={ntfpRevenueSegments}
+                  onChange={(segments: RevenueSegment[]) =>
+                    setValue(`methodCosts.${activeTab}.ntfpRevenueSegments`, segments, { shouldDirty: true })
+                  }
                   onTotalChange={(total) =>
                     setValue(`methodCosts.${activeTab}.ntfpRevenue`, total, { shouldDirty: true })
                   }

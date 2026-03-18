@@ -13,7 +13,15 @@
  * =============================================================================
  */
 
-import type { AssistanceCost, ComputedFields, CostBreakdownItem, MethodCosts } from "../types";
+import type {
+  AssistanceCost,
+  ComputedFields,
+  CostBreakdownItem,
+  CostSegment,
+  MethodCosts,
+  ProductivitySegment,
+  RevenueSegment,
+} from "../types";
 import type { RestorationModelFormData } from "../schemas";
 import { RECONCILIATION_TOLERANCE } from "../constants";
 
@@ -139,22 +147,139 @@ function randDist(): { labor: number; materials: number; machinery: number } {
   return { labor: a, materials: b, machinery: c };
 }
 
+function buildMaintenanceSegments(): {
+  maintenanceSegments: CostSegment[];
+  maintenanceCost: number;
+  intensiveMaintenanceStartYear: number;
+  intensiveMaintenanceEndYear: number;
+  intensiveMaintenanceCost: number;
+} {
+  const intensiveStart = randInt(2, 4);
+  const intensiveEnd = randInt(intensiveStart + 2, 7);
+  const intensiveAnnualCost = rand(120, 420);
+  const followUpAnnualCost = rand(25, Math.max(60, intensiveAnnualCost * 0.35));
+
+  const maintenanceSegments: CostSegment[] = [
+    {
+      id: `maint-${crypto.randomUUID()}`,
+      label: "Intensive maintenance",
+      yearFrom: intensiveStart,
+      yearTo: intensiveEnd,
+      cost: intensiveAnnualCost,
+    },
+    {
+      id: `maint-${crypto.randomUUID()}`,
+      label: "Monitoring and touch-up",
+      yearFrom: intensiveEnd + 1,
+      yearTo: 20,
+      cost: followUpAnnualCost,
+    },
+  ];
+
+  const intensiveYears = intensiveEnd - intensiveStart + 1;
+  const followUpYears = 20 - intensiveEnd;
+  const maintenanceCost = intensiveAnnualCost * intensiveYears + followUpAnnualCost * followUpYears;
+
+  return {
+    maintenanceSegments,
+    maintenanceCost: Math.round(maintenanceCost * 100) / 100,
+    intensiveMaintenanceStartYear: intensiveStart,
+    intensiveMaintenanceEndYear: intensiveEnd,
+    intensiveMaintenanceCost: Math.round(intensiveAnnualCost * intensiveYears * 100) / 100,
+  };
+}
+
+function buildNtfpSegments(price: number): {
+  ntfpProductivitySegments: ProductivitySegment[];
+  ntfpRevenueSegments: RevenueSegment[];
+  ntfpProductivity: number;
+  ntfpRevenue: number;
+} {
+  const earlyStart = randInt(4, 6);
+  const earlyEnd = randInt(earlyStart + 2, 10);
+  const matureStart = earlyEnd + 1;
+  const earlyProductivity = rand(80, 260);
+  const matureProductivity = rand(earlyProductivity + 40, earlyProductivity + 260);
+  const earlyRevenue = earlyProductivity * price;
+  const matureRevenue = matureProductivity * price;
+
+  const ntfpProductivitySegments: ProductivitySegment[] = [
+    {
+      id: `prod-${crypto.randomUUID()}`,
+      label: "Early harvest",
+      yearFrom: earlyStart,
+      yearTo: earlyEnd,
+      productivity: Math.round(earlyProductivity * 100) / 100,
+    },
+    {
+      id: `prod-${crypto.randomUUID()}`,
+      label: "Mature harvest",
+      yearFrom: matureStart,
+      yearTo: 20,
+      productivity: Math.round(matureProductivity * 100) / 100,
+    },
+  ];
+
+  const ntfpRevenueSegments: RevenueSegment[] = [
+    {
+      id: `rev-${crypto.randomUUID()}`,
+      label: "Early harvest sales",
+      yearFrom: earlyStart,
+      yearTo: earlyEnd,
+      revenue: Math.round(earlyRevenue * 100) / 100,
+    },
+    {
+      id: `rev-${crypto.randomUUID()}`,
+      label: "Mature harvest sales",
+      yearFrom: matureStart,
+      yearTo: 20,
+      revenue: Math.round(matureRevenue * 100) / 100,
+    },
+  ];
+
+  const earlyYears = earlyEnd - earlyStart + 1;
+  const matureYears = 20 - earlyEnd;
+  const ntfpRevenue = earlyRevenue * earlyYears + matureRevenue * matureYears;
+  const ntfpProductivity =
+    (earlyProductivity * earlyYears + matureProductivity * matureYears) / (earlyYears + matureYears);
+
+  return {
+    ntfpProductivitySegments,
+    ntfpRevenueSegments,
+    ntfpProductivity: Math.round(ntfpProductivity * 100) / 100,
+    ntfpRevenue: Math.round(ntfpRevenue * 100) / 100,
+  };
+}
+
 function randMethodEntry(isNtfp: boolean) {
   const implDist = randDist();
   const maintDist = randDist();
-  const startYr = randInt(2, 6);
+  const price = isNtfp ? rand(0.5, 15) : 0;
+  const maintenance = buildMaintenanceSegments();
+  const ntfp = isNtfp
+    ? buildNtfpSegments(price)
+    : {
+        ntfpProductivitySegments: [],
+        ntfpRevenueSegments: [],
+        ntfpProductivity: 0,
+        ntfpRevenue: 0,
+      };
+
   return {
     implementationCost: rand(500, 8000),
     implementationDistribution: implDist,
-    maintenanceCost: rand(200, 5000),
+    maintenanceCost: maintenance.maintenanceCost,
     maintenanceDistribution: maintDist,
-    intensiveMaintenanceStartYear: startYr,
-    intensiveMaintenanceEndYear: randInt(startYr + 1, 12),
-    intensiveMaintenanceCost: rand(100, 3000),
+    intensiveMaintenanceStartYear: maintenance.intensiveMaintenanceStartYear,
+    intensiveMaintenanceEndYear: maintenance.intensiveMaintenanceEndYear,
+    intensiveMaintenanceCost: maintenance.intensiveMaintenanceCost,
+    maintenanceSegments: maintenance.maintenanceSegments,
     ntfpSpecies: isNtfp ? ["Açaí", "Brazil nut", "Copaíba", "Andiroba", "Buriti"][randInt(0, 4)] : "",
-    ntfpProductivity: isNtfp ? rand(50, 800) : 0,
-    ntfpPrice: isNtfp ? rand(0.5, 15) : 0,
-    ntfpRevenue: isNtfp ? rand(100, 5000) : 0,
+    ntfpProductivity: ntfp.ntfpProductivity,
+    ntfpPrice: price,
+    ntfpRevenue: ntfp.ntfpRevenue,
+    ntfpProductivitySegments: ntfp.ntfpProductivitySegments,
+    ntfpRevenueSegments: ntfp.ntfpRevenueSegments,
   };
 }
 
@@ -163,6 +288,7 @@ function randConstraint() {
   return {
     cost: rand(50, 2000),
     occurrences: randInt(1, 10),
+    firebreakArea: 0,
     distribution: dist,
   };
 }
@@ -225,9 +351,10 @@ export function generateTestData(): RestorationModelFormData {
       seedling_planting_ntfp: randMethodEntry(true),
     },
     contextVariables: {
-      fireRisk: randConstraint(),
+      fireRisk: { ...randConstraint(), firebreakArea: rand(10, 200) },
       grazingPressure: randConstraint(),
       invasiveSpeciesPressure: randConstraint(),
+      antInfestation: randConstraint(),
     },
     selectedAssistances: selectedAssistances,
     favorableScenario: {

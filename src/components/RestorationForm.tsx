@@ -10,12 +10,10 @@
 
 import { useState } from "react";
 import { FormProvider } from "react-hook-form";
-import { Save, FlaskConical } from "lucide-react";
+import { FlaskConical } from "lucide-react";
 import { useRestorationForm } from "../hooks/useRestorationForm";
 import { useComputedFields } from "../hooks/useComputedFields";
 import type { RestorationModelFormData } from "../schemas";
-import type { RestorationModel } from "../types";
-import { saveModel } from "../utils/storage";
 import { atLeastOneMethodTabComplete, generateTestData } from "../utils/computations";
 
 import {
@@ -35,9 +33,9 @@ interface Props {
   onSaved?: () => void;
 }
 
-export function RestorationForm({ initialData, onSaved }: Props) {
+export function RestorationForm({ initialData }: Props) {
   const form = useRestorationForm(initialData);
-  const { watch, reset, getValues } = form;
+  const { watch, reset } = form;
   const [showWarning, setShowWarning] = useState(false);
 
   // Watch all values for computed fields (reactive)
@@ -45,18 +43,6 @@ export function RestorationForm({ initialData, onSaved }: Props) {
   const computed = useComputedFields(values);
 
   const methodsComplete = atLeastOneMethodTabComplete(values.methodCosts as any);
-
-  const handleSave = () => {
-    const data = getValues();
-    if (!atLeastOneMethodTabComplete(data.methodCosts as any)) {
-      setShowWarning(true);
-      return;
-    }
-    saveModel(data as RestorationModel);
-    setShowWarning(false);
-    alert("Model saved successfully!");
-    onSaved?.();
-  };
 
   const handleGenerateTest = () => {
     const testData = generateTestData();
@@ -82,15 +68,12 @@ export function RestorationForm({ initialData, onSaved }: Props) {
           )}
           <button
             type="button"
-            className="btn btn--success"
-            onClick={handleSave}
-          >
-            <Save size={16} /> Save Model
-          </button>
-          <button
-            type="button"
             className="btn btn--secondary"
-            onClick={() => reset()}
+            onClick={() => {
+              if (window.confirm("Are you sure you want to reset the form? All unsaved data will be lost.")) {
+                reset();
+              }
+            }}
           >
             Reset Form
           </button>

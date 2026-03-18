@@ -17,8 +17,9 @@ export type RestorationForm = UseFormReturn<RestorationModelFormData>;
 export function useRestorationForm(
   initialValues?: Partial<RestorationModelFormData>
 ): RestorationForm {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Zod v4 input/output type mismatch with @hookform/resolvers
   return useForm<RestorationModelFormData>({
-    resolver: zodResolver(restorationModelSchema),
+    resolver: zodResolver(restorationModelSchema) as any,
     defaultValues: {
       ...DEFAULT_FORM_VALUES,
       ...initialValues,

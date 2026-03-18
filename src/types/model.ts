@@ -45,6 +45,32 @@ export interface FactorShares {
   machinery: number;
 }
 
+export interface YearRangeSegment {
+  /** Stable identifier used by the UI */
+  id: string;
+  /** Human-readable activity name */
+  label: string;
+  /** First year included in the segment */
+  yearFrom: number;
+  /** Last year included in the segment */
+  yearTo: number;
+}
+
+export interface CostSegment extends YearRangeSegment {
+  /** Annual maintenance cost applied to each year in the range (US$/ha/yr) */
+  cost: number;
+}
+
+export interface RevenueSegment extends YearRangeSegment {
+  /** Annual revenue applied to each year in the range (US$/ha/yr) */
+  revenue: number;
+}
+
+export interface ProductivitySegment extends YearRangeSegment {
+  /** Annual NTFP productivity applied to each year in the range (kg/ha/yr) */
+  productivity: number;
+}
+
 // ---------------------------------------------------------------------------
 // Scenario Cost Structure
 // ---------------------------------------------------------------------------
@@ -87,6 +113,8 @@ export interface ContextConstraintEntry {
   cost: number;
   /** Number of times this activity needs to occur over the 20-year horizon */
   occurrences: number;
+  /** Average total area that needs firebreaks in one property (ha) — only for fireRisk */
+  firebreakArea?: number;
   /** Factor-of-production distribution (labor / machinery / materials, must sum to 100%) */
   distribution: FactorShares;
 }
@@ -103,6 +131,8 @@ export interface ContextVariables {
   grazingPressure: ContextConstraintEntry;
   /** Weed Control / Invasive Species Pressure */
   invasiveSpeciesPressure: ContextConstraintEntry;
+  /** Ant Control / Ant Infestation Risk */
+  antInfestation: ContextConstraintEntry;
 }
 
 // ---------------------------------------------------------------------------
@@ -155,6 +185,12 @@ export interface MethodCostEntry {
   ntfpPrice?: number;
   /** Total NTFP revenue in US$/ha (computed from timeline or manual) */
   ntfpRevenue?: number;
+  /** Maintenance activities by year range, each with annual cost */
+  maintenanceSegments?: CostSegment[];
+  /** NTFP productivity by year range */
+  ntfpProductivitySegments?: ProductivitySegment[];
+  /** NTFP revenue by year range, each with annual revenue */
+  ntfpRevenueSegments?: RevenueSegment[];
 }
 
 /**

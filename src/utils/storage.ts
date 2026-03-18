@@ -148,11 +148,12 @@ const METHOD_LABELS: Record<string, string> = {
   seedling_planting_ntfp: "Full Seedling Plantation (NTFP)",
 };
 
-const CONSTRAINT_KEYS = ["fireRisk", "grazingPressure", "invasiveSpeciesPressure"] as const;
+const CONSTRAINT_KEYS = ["fireRisk", "grazingPressure", "invasiveSpeciesPressure", "antInfestation"] as const;
 const CONSTRAINT_SHORT: Record<string, string> = {
   fireRisk: "Fire",
   grazingPressure: "Fence",
   invasiveSpeciesPressure: "Weed",
+  antInfestation: "Ant",
 };
 
 type Row = Record<string, string | number>;
@@ -180,7 +181,10 @@ function buildSharedColumns(d: RestorationModel): Row {
     if (!c) continue;
 
     row[`${s}_UnitCost`] = c.cost ?? 0;
-    row[`${s}_Occur`] = c.occurrences ?? 0;
+    row[ck === "grazingPressure" ? `${s}_Area_ha` : `${s}_Occur`] = c.occurrences ?? 0;
+    if (ck === "fireRisk") {
+      row[`${s}_FirebreakArea_ha`] = c.firebreakArea ?? 0;
+    }
     row[`${s}_TotalCost`] = (c.cost ?? 0) * (c.occurrences ?? 0);
     row[`${s}_Labor_%`] = c.distribution?.labor ?? 0;
     row[`${s}_Mater_%`] = c.distribution?.materials ?? 0;
@@ -257,6 +261,30 @@ function buildMethodColumns(mk: MethodType, d: RestorationModel): Row {
   row["NTFP_Productiv_kg"] = m?.ntfpProductivity ?? 0;
   row["NTFP_Price_USD"] = m?.ntfpPrice ?? 0;
   row["NTFP_Revenue_USD"] = m?.ntfpRevenue ?? 0;
+
+  m?.maintenanceSegments?.forEach((segment, index) => {
+    const n = index + 1;
+    row[`MaintSeg${n}_Name`] = segment.label ?? "";
+    row[`MaintSeg${n}_From_yr`] = segment.yearFrom ?? 0;
+    row[`MaintSeg${n}_To_yr`] = segment.yearTo ?? 0;
+    row[`MaintSeg${n}_Annual_USD`] = segment.cost ?? 0;
+  });
+
+  m?.ntfpProductivitySegments?.forEach((segment, index) => {
+    const n = index + 1;
+    row[`ProdSeg${n}_Name`] = segment.label ?? "";
+    row[`ProdSeg${n}_From_yr`] = segment.yearFrom ?? 0;
+    row[`ProdSeg${n}_To_yr`] = segment.yearTo ?? 0;
+    row[`ProdSeg${n}_kg_ha_yr`] = segment.productivity ?? 0;
+  });
+
+  m?.ntfpRevenueSegments?.forEach((segment, index) => {
+    const n = index + 1;
+    row[`RevSeg${n}_Name`] = segment.label ?? "";
+    row[`RevSeg${n}_From_yr`] = segment.yearFrom ?? 0;
+    row[`RevSeg${n}_To_yr`] = segment.yearTo ?? 0;
+    row[`RevSeg${n}_Annual_USD`] = segment.revenue ?? 0;
+  });
 
   return row;
 }

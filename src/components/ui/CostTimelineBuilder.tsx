@@ -7,23 +7,20 @@
  * The sum of all segments is propagated via `onTotalChange`.
  */
 
-import { useState, useId } from "react";
+import { useId } from "react";
+import type { CostSegment } from "../../types";
 
 // â”€â”€â”€ Types â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-
-export interface CostSegment {
-  id: string;
-  label: string;
-  yearFrom: number;
-  yearTo: number;
-  cost: number;
-}
 
 interface Props {
   /** First year on the timeline (default: 2 â€” year 1 is implementation) */
   startYear?: number;
   /** Last year on the timeline (default: 20) */
   maxYear?: number;
+  /** Current set of persisted segments */
+  value: CostSegment[];
+  /** Called whenever the segments change */
+  onChange: (segments: CostSegment[]) => void;
   /** Called whenever the total cost changes */
   onTotalChange: (total: number) => void;
 }
@@ -45,6 +42,14 @@ const CH = VH - P.top  - P.bottom;
 
 function formatUSD(v: number) {
   return v.toLocaleString("en-US", { maximumFractionDigits: 0 });
+}
+
+function getSegmentSpan(segment: CostSegment) {
+  return Math.max(0, segment.yearTo - segment.yearFrom + 1);
+}
+
+function computeTotal(segments: CostSegment[]) {
+  return segments.reduce((sum, seg) => sum + getSegmentSpan(seg) * (Number(seg.cost) || 0), 0);
 }
 
 // â”€â”€â”€ Step-function line chart â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
@@ -148,13 +153,13 @@ function Legend({ segments }: { segments: CostSegment[] }) {
 
 // â”€â”€â”€ Main â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-export function CostTimelineBuilder({ startYear = 2, maxYear = 20, onTotalChange }: Props) {
+export function CostTimelineBuilder({ startYear = 2, maxYear = 20, value, onChange, onTotalChange }: Props) {
   const uid = useId();
-  const [segments, setSegments] = useState<CostSegment[]>([]);
+  const segments = value;
 
   const update = (updated: CostSegment[]) => {
-    setSegments(updated);
-    onTotalChange(updated.reduce((s, seg) => s + (Number(seg.cost) || 0), 0));
+    onChange(updated);
+    onTotalChange(computeTotal(updated));
   };
 
   const add = () =>
@@ -164,7 +169,7 @@ export function CostTimelineBuilder({ startYear = 2, maxYear = 20, onTotalChange
   const patch  = (id: string, p: Partial<CostSegment>) =>
     update(segments.map((s) => (s.id === id ? { ...s, ...p } : s)));
 
-  const total = segments.reduce((s, seg) => s + (Number(seg.cost) || 0), 0);
+  const total = computeTotal(segments);
 
   return (
     <div className="cost-timeline-builder">
@@ -181,10 +186,19 @@ export function CostTimelineBuilder({ startYear = 2, maxYear = 20, onTotalChange
 
             <div className="cost-timeline-field cost-timeline-field--label">
               <label className="cost-timeline-input-label">Name</label>
-              <input type="text" className="cost-timeline-input"
-                placeholder={`Segment ${i + 1}`}
+              <select
+                className="cost-timeline-input"
                 value={seg.label}
-                onChange={(e) => patch(seg.id, { label: e.target.value })} />
+                onChange={(e) => patch(seg.id, { label: e.target.value })}
+              >
+                <option value="">Select activity...</option>
+                <option value="Survival checks">Survival checks</option>
+                <option value="Limited replacement of failed enriched seedlings">Limited replacement of failed enriched seedlings</option>
+                <option value="NTFP harvesting">NTFP harvesting</option>
+                <option value="Light monitoring activities">Light monitoring activities</option>
+                <option value="Maintenance of regenerating individuals">Maintenance of regenerating individuals</option>
+                <option value="Maintenance of NTFP species">Maintenance of NTFP species</option>
+              </select>
             </div>
 
             <div className="cost-timeline-field cost-timeline-field--year">
@@ -246,7 +260,7 @@ export function CostTimelineBuilder({ startYear = 2, maxYear = 20, onTotalChange
           </span>
         </div>
         {segments.length > 0 && (
-          <span className="cost-timeline-total">Total: <strong>US$ {formatUSD(total)}/ha</strong></span>
+          <span className="cost-timeline-total">Accumulated total: <strong>US$ {formatUSD(total)}/ha</strong></span>
         )}
       </div>
     </div>

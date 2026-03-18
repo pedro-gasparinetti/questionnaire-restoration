@@ -28,6 +28,7 @@ const CONSTRAINT_META: Record<string, { label: string; unit: string }> = {
   fireRisk:                  { label: "Firebreak / Fire Risk",                    unit: "US$/ha" },
   grazingPressure:           { label: "Fencing / Grazing Pressure",               unit: "US$/km" },
   invasiveSpeciesPressure:   { label: "Weed Control / Invasive Species Pressure", unit: "US$/ha" },
+  antInfestation:            { label: "Ant Control / Ant Infestation Risk",       unit: "US$/ha" },
 };
 
 // ---------------------------------------------------------------------------
@@ -93,6 +94,7 @@ interface MethodSummary {
     unit: string;
     unitCost: number;
     occurrences: number;
+    firebreakArea?: number;
     totalCost: number;
     distribution: FactorShares;
   }[];
@@ -133,7 +135,7 @@ export function SummaryValidationSection(_props: Props) {
       const maintDist: FactorShares = entry.maintenanceDistribution ?? { labor: 0, materials: 0, machinery: 0 };
 
       // Context constraints
-      const constraintKeys = ["fireRisk", "grazingPressure", "invasiveSpeciesPressure"] as const;
+      const constraintKeys = ["fireRisk", "grazingPressure", "invasiveSpeciesPressure", "antInfestation"] as const;
       const constraints = constraintKeys.map((k) => {
         const c: ContextConstraintEntry = (ctx as any)[k] ?? {
           cost: 0,
@@ -149,6 +151,7 @@ export function SummaryValidationSection(_props: Props) {
           unit: meta.unit,
           unitCost,
           occurrences,
+          firebreakArea: k === "fireRisk" ? (Number(c.firebreakArea) || 0) : undefined,
           totalCost: unitCost * occurrences,
           distribution: c.distribution ?? { labor: 0, materials: 0, machinery: 0 },
         };
@@ -232,19 +235,24 @@ function MethodSummaryBlock({ summary: m }: { summary: MethodSummary }) {
       {/* Section 2 — Context Constraints & Additional Costs */}
       <SummaryTable
         caption="Context Constraints &amp; Additional Costs"
-        headers={["Constraint", "Unit Cost", "Occurrences", "Total Cost"]}
+        headers={["Constraint", "Unit Cost", "Occurrences / Area", "Firebreak Area (ha)", "Total Cost"]}
         rows={[
           ...m.constraints.map((c) => ({
             label: c.label,
             values: [
               c.unitCost > 0 ? `${fmt(c.unitCost)} ${c.unit}` : "—",
-              c.occurrences > 0 ? `${c.occurrences}` : "—",
+              c.occurrences > 0
+                ? c.key === "grazingPressure"
+                  ? `${c.occurrences} ha`
+                  : `${c.occurrences}`
+                : "—",
+              c.key === "fireRisk" && c.firebreakArea ? `${c.firebreakArea} ha` : "—",
               c.totalCost > 0 ? formatUSD(c.totalCost) : "—",
             ],
           })),
           {
             label: "Total Additional Cost",
-            values: ["", "", formatUSD(m.totalAdditional)],
+            values: ["", "", "", formatUSD(m.totalAdditional)],
             className: "summary-table-total",
           },
         ]}

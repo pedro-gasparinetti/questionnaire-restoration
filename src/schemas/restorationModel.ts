@@ -92,6 +92,36 @@ export const costDistributionSchema = z
     path: ["labor"],
   });
 
+export const yearRangeSegmentSchema = z.object({
+  id: z.string().min(1, "Segment id is required"),
+  label: z.string().default(""),
+  yearFrom: z
+    .number({ message: "Start year is required" })
+    .int("Must be a whole number")
+    .min(2, "Minimum year 2 (year 1 is implementation)")
+    .max(20, "Maximum 20 years"),
+  yearTo: z
+    .number({ message: "End year is required" })
+    .int("Must be a whole number")
+    .min(2, "Minimum year 2 (year 1 is implementation)")
+    .max(20, "Maximum 20 years"),
+}).refine((segment) => segment.yearTo >= segment.yearFrom, {
+  message: "End year must be greater than or equal to start year",
+  path: ["yearTo"],
+});
+
+export const costSegmentSchema = yearRangeSegmentSchema.extend({
+  cost: z.number({ message: "Cost is required" }).min(0, "Cannot be negative"),
+});
+
+export const revenueSegmentSchema = yearRangeSegmentSchema.extend({
+  revenue: z.number({ message: "Revenue is required" }).min(0, "Cannot be negative"),
+});
+
+export const productivitySegmentSchema = yearRangeSegmentSchema.extend({
+  productivity: z.number({ message: "Productivity is required" }).min(0, "Cannot be negative"),
+});
+
 // ---------------------------------------------------------------------------
 // Context Variables
 // ---------------------------------------------------------------------------
@@ -105,6 +135,11 @@ export const contextConstraintEntrySchema = z.object({
     .number({ message: "Number of occurrences is required" })
     .int("Must be a whole number")
     .min(0, "Cannot be negative"),
+  firebreakArea: z
+    .number()
+    .min(0, "Cannot be negative")
+    .optional()
+    .default(0),
   distribution: costDistributionSchema,
 });
 
@@ -112,6 +147,7 @@ export const contextVariablesSchema = z.object({
   fireRisk: contextConstraintEntrySchema,
   grazingPressure: contextConstraintEntrySchema,
   invasiveSpeciesPressure: contextConstraintEntrySchema,
+  antInfestation: contextConstraintEntrySchema,
 });
 
 // ---------------------------------------------------------------------------
@@ -147,6 +183,9 @@ export const methodCostEntrySchema = z.object({
   ntfpProductivity: z.number().min(0, "Cannot be negative").optional().default(0),
   ntfpPrice: z.number().min(0, "Cannot be negative").optional().default(0),
   ntfpRevenue: z.number().min(0, "Cannot be negative").optional().default(0),
+  maintenanceSegments: z.array(costSegmentSchema).optional().default([]),
+  ntfpProductivitySegments: z.array(productivitySegmentSchema).optional().default([]),
+  ntfpRevenueSegments: z.array(revenueSegmentSchema).optional().default([]),
 });
 
 export const methodCostsSchema = z.object({
@@ -185,7 +224,7 @@ export const restorationModelSchema = z.object({
   respondentName: z.string().optional().default(""),
   gpsCoordinates: z.string().optional().default(""),
   ecosystem: z.string().min(1, "Ecosystem is required"),
-  country: z.string().min(1, "Country is required"),
+  country: z.string().optional().default(""),
   city: z.string().optional().default(""),
   timeHorizon: z.literal(20).default(20),
 
