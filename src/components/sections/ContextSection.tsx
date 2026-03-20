@@ -322,7 +322,7 @@ export function ContextSection() {
           </p>
           <CostTimelineBuilder
             key={activeTab}
-            startYear={2}
+            startYear={1}
             maxYear={20}
             value={maintenanceSegments}
             onChange={(segments: CostSegment[]) =>
@@ -331,6 +331,7 @@ export function ContextSection() {
             onTotalChange={(total) =>
               setValue(`methodCosts.${activeTab}.maintenanceCost`, total, { shouldDirty: true })
             }
+            isAnrEnrichment={activeTab === "anr_30" || activeTab === "anr_30_ntfp"}
           />
 
           <div className="cost-distribution">
@@ -416,7 +417,7 @@ export function ContextSection() {
                   </p>
                   <ProductivityTimelineBuilder
                     key={`prod-${activeTab}`}
-                    startYear={2}
+                    startYear={1}
                     maxYear={20}
                     value={ntfpProductivitySegments}
                     onChange={(segments: ProductivitySegment[]) =>
@@ -448,7 +449,7 @@ export function ContextSection() {
                 </p>
                 <RevenueTimelineBuilder
                   key={`rev-${activeTab}`}
-                  startYear={2}
+                  startYear={1}
                   maxYear={20}
                   value={ntfpRevenueSegments}
                   onChange={(segments: RevenueSegment[]) =>

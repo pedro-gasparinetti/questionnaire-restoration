@@ -36,7 +36,7 @@ export function LaborBreakdownSection() {
 
   return (
     <CollapsibleSection
-      title="4. Labor Breakdown"
+      title="4. Labor Breakdown &amp; Machinery"
       subtitle="Hired Labor vs Family Labor — by phase"
       icon={<HardHat size={20} />}
     >
@@ -210,24 +210,39 @@ export function LaborBreakdownSection() {
         </div>
       </div>
 
-      {/* Hired Labor Cost Reference */}
+      {/* Hired Labor Cost Reference & Machinery Unit Cost */}
       <div className="labor-rate-box" style={{ marginTop: "1.5rem" }}>
         <h5 className="labor-rate-title">Hired Labor Cost Reference</h5>
-        <div style={{ maxWidth: "280px" }}>
-          <FormField
-            label="Hired Labor Cost"
-            unit="US$/day"
-            type="number"
-            min="0"
-            step="0.01"
-            registration={register("laborBreakdown.hiredLaborCostPerDay", {
-              valueAsNumber: true,
-            })}
-            error={laborErrors?.hiredLaborCostPerDay}
-          />
+        <div style={{ display: "flex", gap: "1.5rem", flexWrap: "wrap" }}>
+          <div style={{ maxWidth: "280px", flex: "1 1 240px" }}>
+            <FormField
+              label="Hired Labor Cost"
+              unit="US$/day"
+              type="number"
+              min="0"
+              step="0.01"
+              registration={register("laborBreakdown.hiredLaborCostPerDay", {
+                valueAsNumber: true,
+              })}
+              error={laborErrors?.hiredLaborCostPerDay}
+            />
+          </div>
+          <div style={{ maxWidth: "280px", flex: "1 1 240px" }}>
+            <FormField
+              label="Machinery Unit Cost"
+              unit="US$/hour"
+              type="number"
+              min="0"
+              step="0.01"
+              registration={register("laborBreakdown.machineryUnitCostPerHour", {
+                valueAsNumber: true,
+              })}
+              error={laborErrors?.machineryUnitCostPerHour}
+            />
+          </div>
         </div>
         <p className="labor-rate-hint">
-          Average daily wage for hired field workers in this region.
+          Average daily wage for hired field workers and hourly cost of machinery in this region.
         </p>
       </div>
     </CollapsibleSection>
