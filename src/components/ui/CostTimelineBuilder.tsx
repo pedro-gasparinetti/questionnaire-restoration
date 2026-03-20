@@ -22,8 +22,8 @@ interface Props {
   /** Called whenever the segments change */
   onChange: (segments: CostSegment[]) => void;
   /** Called whenever the total cost changes */
-  onTotalChange: (total: number) => void;
-}
+  onTotalChange: (total: number) => void;  /** Whether this is for ANR/Enrichment methods (affects activity list) */
+  isAnrEnrichment?: boolean;}
 
 // â”€â”€â”€ Colours & geometry â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
@@ -153,9 +153,28 @@ function Legend({ segments }: { segments: CostSegment[] }) {
 
 // â”€â”€â”€ Main â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-export function CostTimelineBuilder({ startYear = 2, maxYear = 20, value, onChange, onTotalChange }: Props) {
+export function CostTimelineBuilder({ startYear = 2, maxYear = 20, value, onChange, onTotalChange, isAnrEnrichment = false }: Props) {
   const uid = useId();
   const segments = value;
+
+  // Activity lists based on restoration method
+  const anrEnrichmentActivities = [
+    "Maintenance of regenerating individuals (e.g. prunning, thinning and support staking)",
+    "Maintenance of NTFP species (e.g. prunning, thinning and support staking)",
+    "Harvest",
+    "Technical assistance",
+    "Monitoring General Maintenance Activities (e.g. shade management)",
+  ];
+
+  const otherMethodActivities = [
+    "Maintenance of regenerating individuals (e.g. prunning, thinning and fertilization)",
+    "Maintenance of NTFP species (e.g. prunning, thinning and fertilization)",
+    "Harvest",
+    "Technical assistance",
+    "Monitoring General Maintenance Activities (e.g. shade management)",
+  ];
+
+  const activities = isAnrEnrichment ? anrEnrichmentActivities : otherMethodActivities;
 
   const update = (updated: CostSegment[]) => {
     onChange(updated);
@@ -192,12 +211,9 @@ export function CostTimelineBuilder({ startYear = 2, maxYear = 20, value, onChan
                 onChange={(e) => patch(seg.id, { label: e.target.value })}
               >
                 <option value="">Select activity...</option>
-                <option value="Survival checks">Survival checks</option>
-                <option value="Limited replacement of failed enriched seedlings">Limited replacement of failed enriched seedlings</option>
-                <option value="NTFP harvesting">NTFP harvesting</option>
-                <option value="Light monitoring activities">Light monitoring activities</option>
-                <option value="Maintenance of regenerating individuals">Maintenance of regenerating individuals</option>
-                <option value="Maintenance of NTFP species">Maintenance of NTFP species</option>
+                {activities.map((activity) => (
+                  <option key={activity} value={activity}>{activity}</option>
+                ))}
               </select>
             </div>
 

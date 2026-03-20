@@ -374,6 +374,7 @@ export function generateTestData(): RestorationModelFormData {
       implementation: { hiredLabor: implHired, familyLabor: 100 - implHired },
       maintenance: { hiredLabor: maintHired, familyLabor: 100 - maintHired },
       hiredLaborCostPerDay: rand(15, 80),
+      machineryUnitCostPerHour: rand(20, 120),
       genderDistribution: { male: gMale, female: gFemale, other: gOther },
     },
   };

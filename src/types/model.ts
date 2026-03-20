@@ -317,6 +317,8 @@ export interface LaborBreakdown {
   maintenance: LaborPhaseBreakdown;
   /** Hired labor daily rate — regional reference (US$/day) */
   hiredLaborCostPerDay: number;
+  /** Machinery unit cost — regional reference (US$/hour) */
+  machineryUnitCostPerHour: number;
   /** Gender distribution of the labor force (must sum to 100%) */
   genderDistribution: GenderDistribution;
 }

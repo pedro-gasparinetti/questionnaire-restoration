@@ -225,6 +225,7 @@ function buildSharedColumns(d: RestorationModel): Row {
   row["Maint_Hired_%"] = d.laborBreakdown?.maintenance?.hiredLabor ?? 0;
   row["Maint_Family_%"] = d.laborBreakdown?.maintenance?.familyLabor ?? 0;
   row["HiredRate_USD_day"] = d.laborBreakdown?.hiredLaborCostPerDay ?? 0;
+  row["MachineryRate_USD_hr"] = d.laborBreakdown?.machineryUnitCostPerHour ?? 0;
   row["Gender_Male_%"] = d.laborBreakdown?.genderDistribution?.male ?? 0;
   row["Gender_Female_%"] = d.laborBreakdown?.genderDistribution?.female ?? 0;
   row["Gender_Other_%"] = d.laborBreakdown?.genderDistribution?.other ?? 0;
