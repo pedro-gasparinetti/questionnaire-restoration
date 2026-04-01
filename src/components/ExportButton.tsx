@@ -44,13 +44,13 @@ export function ExportButton({ data, disabled, onDisabledClick }: Props) {
         className={`btn btn--success${disabled ? " btn--faded" : ""}`}
         onClick={handleXlsx}
       >
-        <Download size={16} /> Export Excel
+        <Download size={16} /> Download Results in Excel
       </button>
       <button
         type="button"
         className={`btn btn--success${disabled ? " btn--faded" : ""}`}
         onClick={handleCBA}
-        style={{ background: "#0e7490", borderColor: "#0e7490" }}
+        style={{ display: "none", background: "#0e7490", borderColor: "#0e7490" }}
       >
         <BarChart3 size={16} /> Download CBA
       </button>

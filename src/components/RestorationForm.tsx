@@ -81,7 +81,7 @@ export function RestorationForm({ initialData }: Props) {
             type="button"
             className="btn btn--secondary"
             onClick={handleGenerateTest}
-            style={{ background: "#7c3aed", color: "#fff", borderColor: "#7c3aed" }}
+            style={{ display: "none", background: "#7c3aed", color: "#fff", borderColor: "#7c3aed" }}
           >
             <FlaskConical size={16} /> Generate Test Data
           </button>
