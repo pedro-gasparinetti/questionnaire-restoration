@@ -22,26 +22,21 @@ import { z } from "zod";
 // Reusable sub-schemas
 // ---------------------------------------------------------------------------
 
-/** Factor shares must sum to exactly 100%. */
-export const factorSharesSchema = z
-  .object({
-    labor: z
-      .number({ message: "Labor % is required" })
-      .min(0, "Cannot be negative")
-      .max(100, "Cannot exceed 100%"),
-    materials: z
-      .number({ message: "Materials % is required" })
-      .min(0, "Cannot be negative")
-      .max(100, "Cannot exceed 100%"),
-    machinery: z
-      .number({ message: "Machinery % is required" })
-      .min(0, "Cannot be negative")
-      .max(100, "Cannot exceed 100%"),
-  })
-  .refine((d) => Math.abs(d.labor + d.materials + d.machinery - 100) < 0.01, {
-    message: "Factor shares must sum to 100%",
-    path: ["labor"],
-  });
+/** Factor shares must sum to exactly 100%. Sum is validated via custom UI warnings. */
+export const factorSharesSchema = z.object({
+  labor: z
+    .number({ message: "Labor % is required" })
+    .min(0, "Cannot be negative")
+    .max(100, "Cannot exceed 100%"),
+  materials: z
+    .number({ message: "Materials % is required" })
+    .min(0, "Cannot be negative")
+    .max(100, "Cannot exceed 100%"),
+  machinery: z
+    .number({ message: "Machinery % is required" })
+    .min(0, "Cannot be negative")
+    .max(100, "Cannot exceed 100%"),
+});
 
 // ---------------------------------------------------------------------------
 // Scenario Costs (used for both favorable and unfavorable)
@@ -71,26 +66,21 @@ export const scenarioCostsSchema = z
 // Cost Distribution (reuses factor-shares structure)
 // ---------------------------------------------------------------------------
 
-/** Cost distribution across labor / machinery / materials — must sum to 100%. */
-export const costDistributionSchema = z
-  .object({
-    labor: z
-      .number({ message: "Labor % is required" })
-      .min(0, "Cannot be negative")
-      .max(100, "Cannot exceed 100%"),
-    materials: z
-      .number({ message: "Materials % is required" })
-      .min(0, "Cannot be negative")
-      .max(100, "Cannot exceed 100%"),
-    machinery: z
-      .number({ message: "Machinery % is required" })
-      .min(0, "Cannot be negative")
-      .max(100, "Cannot exceed 100%"),
-  })
-  .refine((d) => Math.abs(d.labor + d.materials + d.machinery - 100) < 0.01, {
-    message: "Distribution must sum to 100%",
-    path: ["labor"],
-  });
+/** Cost distribution across labor / machinery / materials — must sum to 100%. Sum is validated via custom UI warnings. */
+export const costDistributionSchema = z.object({
+  labor: z
+    .number({ message: "Labor % is required" })
+    .min(0, "Cannot be negative")
+    .max(100, "Cannot exceed 100%"),
+  materials: z
+    .number({ message: "Materials % is required" })
+    .min(0, "Cannot be negative")
+    .max(100, "Cannot exceed 100%"),
+  machinery: z
+    .number({ message: "Machinery % is required" })
+    .min(0, "Cannot be negative")
+    .max(100, "Cannot exceed 100%"),
+});
 
 export const yearRangeSegmentSchema = z.object({
   id: z.string().min(1, "Segment id is required"),
@@ -256,16 +246,10 @@ export const restorationModelSchema = z.object({
     implementation: z.object({
       hiredLabor: z.number({ message: "Hired Labor % is required" }).min(0, "Cannot be negative").max(100, "Cannot exceed 100%"),
       familyLabor: z.number({ message: "Family Labor % is required" }).min(0, "Cannot be negative").max(100, "Cannot exceed 100%"),
-    }).refine((d) => Math.abs(d.hiredLabor + d.familyLabor - 100) < 0.01, {
-      message: "Hired + Family labor must sum to 100%",
-      path: ["hiredLabor"],
     }),
     maintenance: z.object({
       hiredLabor: z.number({ message: "Hired Labor % is required" }).min(0, "Cannot be negative").max(100, "Cannot exceed 100%"),
       familyLabor: z.number({ message: "Family Labor % is required" }).min(0, "Cannot be negative").max(100, "Cannot exceed 100%"),
-    }).refine((d) => Math.abs(d.hiredLabor + d.familyLabor - 100) < 0.01, {
-      message: "Hired + Family labor must sum to 100%",
-      path: ["hiredLabor"],
     }),
     hiredLaborCostPerDay: z
       .number({ message: "Hired labor cost is required" })
@@ -279,9 +263,6 @@ export const restorationModelSchema = z.object({
       male:   z.number({ message: "Male % is required" }).min(0, "Cannot be negative").max(100, "Cannot exceed 100%").default(0),
       female: z.number({ message: "Female % is required" }).min(0, "Cannot be negative").max(100, "Cannot exceed 100%").default(0),
       other:  z.number({ message: "Other % is required" }).min(0, "Cannot be negative").max(100, "Cannot exceed 100%").default(0),
-    }).refine((d) => Math.abs(d.male + d.female + d.other - 100) < 0.01, {
-      message: "Gender distribution must sum to 100%",
-      path: ["male"],
     }).default({ male: 0, female: 0, other: 0 }),
   }),
 });

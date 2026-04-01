@@ -40,18 +40,23 @@ export function ContextSection() {
 
   const activeTabData = METHOD_TABS.find((t) => t.id === activeTab) || METHOD_TABS[0];
 
-  // Watch individual distribution fields so React re-renders on every keystroke
-  const implLabor   = watch(`methodCosts.${activeTab}.implementationDistribution.labor`);
-  const implMach    = watch(`methodCosts.${activeTab}.implementationDistribution.machinery`);
-  const implMat     = watch(`methodCosts.${activeTab}.implementationDistribution.materials`);
-  const maintLabor  = watch(`methodCosts.${activeTab}.maintenanceDistribution.labor`);
-  const maintMach   = watch(`methodCosts.${activeTab}.maintenanceDistribution.machinery`);
-  const maintMat    = watch(`methodCosts.${activeTab}.maintenanceDistribution.materials`);
-  const implCostVal    = watch(`methodCosts.${activeTab}.implementationCost`) ?? 0;
-  const maintCostVal   = watch(`methodCosts.${activeTab}.maintenanceCost`) ?? 0;
-  const maintenanceSegments = watch(`methodCosts.${activeTab}.maintenanceSegments`) ?? [];
-  const ntfpProductivitySegments = watch(`methodCosts.${activeTab}.ntfpProductivitySegments`) ?? [];
-  const ntfpRevenueSegments = watch(`methodCosts.${activeTab}.ntfpRevenueSegments`) ?? [];
+  // Derive all active-tab values from the already-watched methodCosts snapshot.
+  // Using a single stable watch("methodCosts") instead of individual dynamic-path
+  // watch() calls prevents the chart from appearing blank when switching back to a
+  // previously-filled tab (dynamic path subscriptions can return the default [] on
+  // remount before the form store re-fires the subscription).
+  const activeEntry = methodCosts?.[activeTab as MethodType];
+  const implLabor   = activeEntry?.implementationDistribution?.labor   ?? 0;
+  const implMach    = activeEntry?.implementationDistribution?.machinery ?? 0;
+  const implMat     = activeEntry?.implementationDistribution?.materials ?? 0;
+  const maintLabor  = activeEntry?.maintenanceDistribution?.labor   ?? 0;
+  const maintMach   = activeEntry?.maintenanceDistribution?.machinery ?? 0;
+  const maintMat    = activeEntry?.maintenanceDistribution?.materials ?? 0;
+  const implCostVal  = activeEntry?.implementationCost ?? 0;
+  const maintCostVal = activeEntry?.maintenanceCost ?? 0;
+  const maintenanceSegments       = (activeEntry?.maintenanceSegments       ?? []) as CostSegment[];
+  const ntfpProductivitySegments  = (activeEntry?.ntfpProductivitySegments  ?? []) as ProductivitySegment[];
+  const ntfpRevenueSegments       = (activeEntry?.ntfpRevenueSegments       ?? []) as RevenueSegment[];
 
   const implSum  = (Number(implLabor) || 0) + (Number(implMach) || 0) + (Number(implMat) || 0);
   const maintSum = (Number(maintLabor) || 0) + (Number(maintMach) || 0) + (Number(maintMat) || 0);
