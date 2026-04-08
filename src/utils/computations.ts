@@ -159,26 +159,40 @@ function buildMaintenanceSegments(): {
   const intensiveAnnualCost = rand(120, 420);
   const followUpAnnualCost = rand(25, Math.max(60, intensiveAnnualCost * 0.35));
 
+  // Use labels that exactly match the CostTimelineBuilder dropdown options
   const maintenanceSegments: CostSegment[] = [
     {
       id: `maint-${crypto.randomUUID()}`,
-      label: "Intensive maintenance",
+      label: "Maintenance of regenerating individuals",
       yearFrom: intensiveStart,
       yearTo: intensiveEnd,
       cost: intensiveAnnualCost,
     },
     {
       id: `maint-${crypto.randomUUID()}`,
-      label: "Monitoring and touch-up",
+      label: "Maintenance of regenerating individuals",
       yearFrom: intensiveEnd + 1,
       yearTo: 20,
       cost: followUpAnnualCost,
     },
+    {
+      id: `maint-${crypto.randomUUID()}`,
+      label: "Light monitoring activities",
+      yearFrom: 2,
+      yearTo: 20,
+      cost: rand(10, 40),
+    },
   ];
+
+  const monitoringCost = maintenanceSegments[2].cost;
 
   const intensiveYears = intensiveEnd - intensiveStart + 1;
   const followUpYears = 20 - intensiveEnd;
-  const maintenanceCost = intensiveAnnualCost * intensiveYears + followUpAnnualCost * followUpYears;
+  const monitoringYears = 19; // yr2–20
+  const maintenanceCost =
+    intensiveAnnualCost * intensiveYears +
+    followUpAnnualCost * followUpYears +
+    monitoringCost * monitoringYears;
 
   return {
     maintenanceSegments,
@@ -256,6 +270,29 @@ function randMethodEntry(isNtfp: boolean) {
   const maintDist = randDist();
   const price = isNtfp ? rand(0.5, 15) : 0;
   const maintenance = buildMaintenanceSegments();
+
+  // For NTFP methods, append an "NTFP harvesting" and "Maintenance of NTFP species"
+  // segment to the shared maintenance list (both use valid dropdown labels)
+  if (isNtfp) {
+    const harvestStart = randInt(3, 6);
+    maintenance.maintenanceSegments.push(
+      {
+        id: `maint-${crypto.randomUUID()}`,
+        label: "NTFP harvesting",
+        yearFrom: harvestStart,
+        yearTo: 20,
+        cost: rand(20, 80),
+      },
+      {
+        id: `maint-${crypto.randomUUID()}`,
+        label: "Maintenance of NTFP species",
+        yearFrom: 1,
+        yearTo: harvestStart - 1 > 0 ? harvestStart - 1 : 1,
+        cost: rand(30, 100),
+      },
+    );
+  }
+
   const ntfp = isNtfp
     ? buildNtfpSegments(price)
     : {
