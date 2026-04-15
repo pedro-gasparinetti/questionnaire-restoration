@@ -265,11 +265,6 @@ function buildCashFlows(
   const productivityByYear = isNtfp ? buildProductivityMap(method, horizon) : createYearMap(horizon);
   const revenueByYear = isNtfp ? buildRevenueMap(method, horizon) : createYearMap(horizon);
 
-  const baseCarbon = getCarbon(data.ecosystem);
-  const carbonMult = METHOD_CARBON_MULT[methodId] || 0.75;
-  // Carbon ramps up: year t gets t/horizon fraction of peak
-  const carbonPeak = baseCarbon * carbonMult;
-
   let cumNet = 0;
   let cumDiscNet = 0;
 
@@ -287,11 +282,8 @@ function buildCashFlows(
     const ntfpProductivity = isNtfp ? productivityByYear[yearNumber] || 0 : 0;
     const ntfpRev = isNtfp ? revenueByYear[yearNumber] || 0 : 0;
 
-    // Carbon benefit ramps linearly
-    const carbonSeqThisYear = carbonPeak * Math.min(1, (t + 1) / 10);
-    const carbonBen = carbonSeqThisYear * CARBON_PRICE;
-
-    const totalBenefit = ntfpRev + carbonBen;
+    // Carbon benefit disabled
+    const totalBenefit = ntfpRev;
     const netFlow = totalBenefit - totalCost;
     cumNet += netFlow;
 
@@ -308,7 +300,7 @@ function buildCashFlows(
       totalCost,
       ntfpProductivity,
       ntfpRevenue: ntfpRev,
-      carbonBenefit: carbonBen,
+      carbonBenefit: 0,
       totalBenefit,
       netFlow,
       cumulativeNet: cumNet,

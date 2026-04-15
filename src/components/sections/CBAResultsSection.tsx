@@ -35,9 +35,9 @@ import { CollapsibleSection } from "../ui";
 // Palette (mirrors App.css green/cream design)
 // ---------------------------------------------------------------------------
 const PALETTE = {
-  impl:       "#2A4B46",   // dark green – implementation cost
-  maint:      "#4E8465",   // medium green – maintenance
-  constraint: "#c0602a",   // burnt orange – constraint costs
+  impl:       "#c0392b",   // red – implementation cost
+  maint:      "#e74c3c",   // light red – maintenance
+  constraint: "#c0392b",   // red – constraint costs
   ntfp:       "#27ae60",   // green – NTFP revenue
   carbon:     "#82c99e",   // light green – carbon benefit
   netLine:    "#1a3530",   // very dark – cumulative net
@@ -122,7 +122,17 @@ export function CBAResultsSection({ values }: Props) {
 // ---------------------------------------------------------------------------
 
 function MethodCBAView({ cba }: { cba: MethodCBA }) {
-  const npv6 = cba.npvByRate.find((r) => r.rate === 0.06)?.npv ?? 0;
+  const npv10 = cba.npvByRate.find((r) => r.rate === 0.10)?.npv ?? 0;
+
+  // Calculate discounted totals at 10%
+  const totalCostsDiscounted = cba.cashFlows.reduce((sum, cf) => {
+    const discountFactor = 1 / Math.pow(1.10, cf.projectYear - 1);
+    return sum + cf.totalCost * discountFactor;
+  }, 0);
+  const totalBenefitsDiscounted = cba.cashFlows.reduce((sum, cf) => {
+    const discountFactor = 1 / Math.pow(1.10, cf.projectYear - 1);
+    return sum + cf.totalBenefit * discountFactor;
+  }, 0);
 
   // Chart data ----------------------------------------------------------------
 
@@ -130,7 +140,6 @@ function MethodCBAView({ cba }: { cba: MethodCBA }) {
     year: `Y${cf.projectYear}`,
     costs: -Math.abs(cf.totalCost),      // always negative (below zero axis)
     ntfpRevenue: cf.ntfpRevenue,
-    carbonBenefit: cf.carbonBenefit,
     cumulative: cf.cumulativeNet,
   }));
 
@@ -153,10 +162,11 @@ function MethodCBAView({ cba }: { cba: MethodCBA }) {
       {/* ── KPI cards ─────────────────────────────────────────────────────── */}
       <div className="cba-kpi-row">
         <KpiCard
-          label="NPV (6% discount)"
-          value={fmtUSD(npv6)}
+
+          label="NPV (10% discount)"
+          value={fmtUSD(npv10)}
           sub="20-year net present value"
-          variant={npv6 >= 0 ? "positive" : "negative"}
+          variant={npv10 >= 0 ? "positive" : "negative"}
         />
         <KpiCard
           label="BCR"
@@ -176,19 +186,13 @@ function MethodCBAView({ cba }: { cba: MethodCBA }) {
           sub="Discounted payback"
           variant={cba.paybackYear != null ? "positive" : "neutral"}
         />
-        <KpiCard
-          label="Cost / tCO₂"
-          value={cba.costPerTCO2 != null ? fmtUSD(cba.costPerTCO2) : "N/A"}
-          sub="Carbon efficiency"
-          variant="neutral"
-        />
       </div>
 
       {/* ── Chart 1: Cash Flow ───────────────────────────────────────────── */}
       <div className="cba-chart-block">
-        <h4 className="cba-chart-title">20-Year Cash Flow (US$/ha)</h4>
+        <h4 className="cba-chart-title">Cash Flow</h4>
         <p className="cba-chart-hint">
-          Costs shown below zero axis. Benefits stacked above. The cumulative net line 
+          Costs shown below zero axis. NTFP revenues above. The cumulative net line 
           (dark) crosses zero at the payback year.
         </p>
         <ResponsiveContainer width="100%" height={300}>
@@ -213,8 +217,7 @@ function MethodCBAView({ cba }: { cba: MethodCBA }) {
             <Legend wrapperStyle={{ fontSize: 11, paddingTop: 8 }} />
             <ReferenceLine y={0} stroke={PALETTE.netLine} strokeWidth={1.5} />
             <Bar dataKey="costs" name="Total Costs" fill={PALETTE.constraint} opacity={0.85} />
-            <Bar dataKey="carbonBenefit" name="Carbon Benefit" stackId="ben" fill={PALETTE.carbon} opacity={0.85} />
-            <Bar dataKey="ntfpRevenue" name="NTFP Revenue" stackId="ben" fill={PALETTE.ntfp} opacity={0.85} />
+            <Bar dataKey="ntfpRevenue" name="NTFP Revenue" fill={PALETTE.ntfp} opacity={0.85} />
             <Line
               type="monotone"
               dataKey="cumulative"
@@ -298,30 +301,20 @@ function MethodCBAView({ cba }: { cba: MethodCBA }) {
       {/* ── Totals footer ─────────────────────────────────────────────────── */}
       <div className="cba-totals-row">
         <div className="cba-total-item">
-          <span className="cba-total-label">20yr Total Costs</span>
+          <span className="cba-total-label">Total Costs (undiscounted)</span>
           <span className="cba-total-value cba-total-value--cost">{fmtUSD(cba.totalCosts20yr)}</span>
         </div>
         <div className="cba-total-item">
-          <span className="cba-total-label">20yr Total Benefits</span>
+          <span className="cba-total-label">Total Costs (disc. 10%)</span>
+          <span className="cba-total-value cba-total-value--cost">{fmtUSD(totalCostsDiscounted)}</span>
+        </div>
+        <div className="cba-total-item">
+          <span className="cba-total-label">Total Benefits (undiscounted)</span>
           <span className="cba-total-value cba-total-value--benefit">{fmtUSD(cba.totalBenefits20yr)}</span>
         </div>
         <div className="cba-total-item">
-          <span className="cba-total-label">Net (undiscounted)</span>
-          <span
-            className={`cba-total-value ${
-              cba.totalBenefits20yr - cba.totalCosts20yr >= 0
-                ? "cba-total-value--benefit"
-                : "cba-total-value--cost"
-            }`}
-          >
-            {fmtUSD(cba.totalBenefits20yr - cba.totalCosts20yr)}
-          </span>
-        </div>
-        <div className="cba-total-item">
-          <span className="cba-total-label">Carbon Seq. Rate</span>
-          <span className="cba-total-value">
-            {cba.carbonSeqRate.toFixed(1)} tCO₂/ha/yr
-          </span>
+          <span className="cba-total-label">Total Benefits (disc. 10%)</span>
+          <span className="cba-total-value cba-total-value--benefit">{fmtUSD(totalBenefitsDiscounted)}</span>
         </div>
       </div>
 
