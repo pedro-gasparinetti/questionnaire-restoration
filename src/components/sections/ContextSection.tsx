@@ -40,20 +40,20 @@ export function ContextSection() {
 
   const activeTabData = METHOD_TABS.find((t) => t.id === activeTab) || METHOD_TABS[0];
 
-  // Derive all active-tab values from the already-watched methodCosts snapshot.
-  // Using a single stable watch("methodCosts") instead of individual dynamic-path
-  // watch() calls prevents the chart from appearing blank when switching back to a
-  // previously-filled tab (dynamic path subscriptions can return the default [] on
-  // remount before the form store re-fires the subscription).
+  // Derive all active-tab values from the already-subscribed methodCosts snapshot.
+  // Do NOT use individual watch(`methodCosts.${activeTab}.xxx`) calls — dynamic-path
+  // subscriptions re-register on tab switch and deliver stale default values for one
+  // render cycle before catching up with the stored data.
   const activeEntry = methodCosts?.[activeTab as MethodType];
-  const implLabor   = activeEntry?.implementationDistribution?.labor   ?? 0;
+
+  const implLabor   = activeEntry?.implementationDistribution?.labor    ?? 0;
   const implMach    = activeEntry?.implementationDistribution?.machinery ?? 0;
   const implMat     = activeEntry?.implementationDistribution?.materials ?? 0;
-  const maintLabor  = activeEntry?.maintenanceDistribution?.labor   ?? 0;
+  const maintLabor  = activeEntry?.maintenanceDistribution?.labor    ?? 0;
   const maintMach   = activeEntry?.maintenanceDistribution?.machinery ?? 0;
   const maintMat    = activeEntry?.maintenanceDistribution?.materials ?? 0;
-  const implCostVal  = activeEntry?.implementationCost ?? 0;
-  const maintCostVal = activeEntry?.maintenanceCost ?? 0;
+  const implCostVal    = activeEntry?.implementationCost ?? 0;
+  const maintCostVal   = activeEntry?.maintenanceCost    ?? 0;
   const maintenanceSegments       = (activeEntry?.maintenanceSegments       ?? []) as CostSegment[];
   const ntfpProductivitySegments  = (activeEntry?.ntfpProductivitySegments  ?? []) as ProductivitySegment[];
   const ntfpRevenueSegments       = (activeEntry?.ntfpRevenueSegments       ?? []) as RevenueSegment[];
@@ -336,6 +336,7 @@ export function ContextSection() {
             onTotalChange={(total) =>
               setValue(`methodCosts.${activeTab}.maintenanceCost`, total, { shouldDirty: true })
             }
+            isAnrEnrichment={activeTab === "anr_30" || activeTab === "anr_30_ntfp"}
           />
 
           <div className="cost-distribution">

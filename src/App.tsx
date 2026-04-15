@@ -36,6 +36,11 @@ function App() {
     <div className="app">
       <header className="app-header">
         <div className="app-header-inner">
+          <img
+            src="/assets/calculator-icon-green.png"
+            alt="Restoration Calculator icon"
+            className="app-header-logo"
+          />
           <div>
             <h1>Restoration Cost-Benefit Questionnaire</h1>
             <p className="app-subtitle">

@@ -11,32 +11,30 @@ import { DEFAULT_FORM_VALUES } from "../constants";
 export type RestorationForm = UseFormReturn<RestorationModelFormData>;
 
 /**
- * Deep-merges `overrides` into `defaults`, so that keys present only in
- * `defaults` (e.g. fields added after a model was saved) are preserved.
- * Arrays are replaced wholesale (not merged element-by-element).
+ * Recursively merges `overrides` into `defaults`, falling back to default
+ * values for any key that is undefined in the override (e.g. fields added
+ * after an older saved model was created).
+ * Arrays are replaced wholesale rather than merged element-by-element.
  */
-function deepMergeDefaults<T>(defaults: T, overrides?: Partial<T>): T {
+function deepMerge<T extends object>(defaults: T, overrides?: Partial<T>): T {
   if (!overrides) return defaults;
   const result = { ...defaults } as Record<string, unknown>;
   for (const key in overrides) {
-    const override = (overrides as Record<string, unknown>)[key];
-    const def = (defaults as Record<string, unknown>)[key];
+    const defVal = (defaults as Record<string, unknown>)[key];
+    const overVal = (overrides as Record<string, unknown>)[key];
     if (
-      override !== undefined &&
-      override !== null &&
-      typeof override === "object" &&
-      !Array.isArray(override) &&
-      def !== undefined &&
-      def !== null &&
-      typeof def === "object" &&
-      !Array.isArray(def)
+      overVal !== undefined &&
+      overVal !== null &&
+      typeof overVal === "object" &&
+      !Array.isArray(overVal) &&
+      defVal !== undefined &&
+      defVal !== null &&
+      typeof defVal === "object" &&
+      !Array.isArray(defVal)
     ) {
-      result[key] = deepMergeDefaults(
-        def as Record<string, unknown>,
-        override as Record<string, unknown>,
-      );
-    } else if (override !== undefined) {
-      result[key] = override;
+      result[key] = deepMerge(defVal as object, overVal as Partial<object>);
+    } else if (overVal !== undefined) {
+      result[key] = overVal;
     }
   }
   return result as T;
@@ -52,12 +50,7 @@ export function useRestorationForm(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Zod v4 input/output type mismatch with @hookform/resolvers
   return useForm<RestorationModelFormData>({
     resolver: zodResolver(restorationModelSchema) as any,
-    // Deep-merge ensures fields added after a model was saved still get their
-    // default values (shallow spread would drop them from nested objects).
-    defaultValues: deepMergeDefaults(
-      DEFAULT_FORM_VALUES as unknown as RestorationModelFormData,
-      initialValues,
-    ),
+    defaultValues: deepMerge(DEFAULT_FORM_VALUES, initialValues),
     mode: "onBlur", // validate on blur for a smoother UX
   });
 }

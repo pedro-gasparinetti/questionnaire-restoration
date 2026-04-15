@@ -156,23 +156,6 @@ const CONSTRAINT_SHORT: Record<string, string> = {
   antInfestation: "Ant",
 };
 
-// ─── Maintenance activity definitions (from CostTimelineBuilder dropdown) ──
-// Column names are derived from these abbreviations — never from slot numbers.
-const MAINT_ACTIVITIES = [
-  { label: "Survival checks",                                  abbr: "SurvChk"    },
-  { label: "Limited replacement of failed enriched seedlings", abbr: "LimRepl"    },
-  { label: "NTFP harvesting",                                  abbr: "NTFPHarv"   },
-  { label: "Light monitoring activities",                      abbr: "LightMon"   },
-  { label: "Maintenance of regenerating individuals",          abbr: "MaintRegen" },
-  { label: "Maintenance of NTFP species",                      abbr: "MaintNTFP"  },
-] as const;
-
-// Max occurrences of the same activity per method (early phase / late phase)
-const MAX_MAINT_SLOTS = 2;
-// Fixed slots for free-text productivity and revenue segments
-const MAX_PROD_SEGS = 3;
-const MAX_REV_SEGS  = 3;
-
 type Row = Record<string, string | number>;
 
 /**
@@ -252,82 +235,57 @@ function buildSharedColumns(d: RestorationModel): Row {
 
 /**
  * Build the method-specific columns for a single method.
- * All segment columns are always emitted (fixed schema), blank when unused.
- *
- * Maintenance columns: one group per activity type (from dropdown), up to
- * MAX_MAINT_SLOTS occurrences each (early-phase / late-phase splits).
- * Column format: {Abbr}{slot}_From_yr | {Abbr}{slot}_To_yr | {Abbr}{slot}_USD_yr
- *
- * Productivity / Revenue: sequential fixed slots with free-text Name.
- * Column format: Prod{n}_Name | Prod{n}_From_yr | Prod{n}_To_yr | Prod{n}_kg_ha_yr
- *                Rev{n}_Name  | Rev{n}_From_yr  | Rev{n}_To_yr  | Rev{n}_USD_yr
  */
 function buildMethodColumns(mk: MethodType, d: RestorationModel): Row {
   const m = d.methodCosts?.[mk];
   const row: Row = {};
 
-  row["Method"]       = METHOD_LABELS[mk] ?? mk;
-  row["Method_ID"]    = mk;
-  row["Is_NTFP"]      = mk.endsWith("_ntfp") ? "Yes" : "No";
+  row["Method"] = METHOD_LABELS[mk] ?? mk;
+  row["Method_ID"] = mk;
+  row["Is_NTFP"] = mk.endsWith("_ntfp") ? "Yes" : "No";
   row["Enrichment_%"] = d.enrichmentIntensity ?? 0;
 
-  row["Impl_USD"]          = m?.implementationCost ?? 0;
-  row["Maint_USD"]         = m?.maintenanceCost ?? 0;
+  row["Impl_USD"] = m?.implementationCost ?? 0;
+  row["Maint_USD"] = m?.maintenanceCost ?? 0;
   row["IntMaint_Start_yr"] = m?.intensiveMaintenanceStartYear ?? 0;
-  row["IntMaint_End_yr"]   = m?.intensiveMaintenanceEndYear ?? 0;
-  row["IntMaint_USD"]      = m?.intensiveMaintenanceCost ?? 0;
-  row["Impl_Labor_%"]      = m?.implementationDistribution?.labor ?? 0;
-  row["Impl_Mater_%"]      = m?.implementationDistribution?.materials ?? 0;
-  row["Impl_Mach_%"]       = m?.implementationDistribution?.machinery ?? 0;
-  row["Maint_Labor_%"]     = m?.maintenanceDistribution?.labor ?? 0;
-  row["Maint_Mater_%"]     = m?.maintenanceDistribution?.materials ?? 0;
-  row["Maint_Mach_%"]      = m?.maintenanceDistribution?.machinery ?? 0;
+  row["IntMaint_End_yr"] = m?.intensiveMaintenanceEndYear ?? 0;
+  row["IntMaint_USD"] = m?.intensiveMaintenanceCost ?? 0;
+  row["Impl_Labor_%"] = m?.implementationDistribution?.labor ?? 0;
+  row["Impl_Mater_%"] = m?.implementationDistribution?.materials ?? 0;
+  row["Impl_Mach_%"] = m?.implementationDistribution?.machinery ?? 0;
+  row["Maint_Labor_%"] = m?.maintenanceDistribution?.labor ?? 0;
+  row["Maint_Mater_%"] = m?.maintenanceDistribution?.materials ?? 0;
+  row["Maint_Mach_%"] = m?.maintenanceDistribution?.machinery ?? 0;
 
-  // NTFP summary columns (always present, empty/0 for non-NTFP methods)
-  row["NTFP_Species"]      = m?.ntfpSpecies ?? "";
+  // NTFP columns always present (empty/0 for non-NTFP methods)
+  row["NTFP_Species"] = m?.ntfpSpecies ?? "";
   row["NTFP_Productiv_kg"] = m?.ntfpProductivity ?? 0;
-  row["NTFP_Price_USD"]    = m?.ntfpPrice ?? 0;
-  row["NTFP_Revenue_USD"]  = m?.ntfpRevenue ?? 0;
+  row["NTFP_Price_USD"] = m?.ntfpPrice ?? 0;
+  row["NTFP_Revenue_USD"] = m?.ntfpRevenue ?? 0;
 
-  // ── Maintenance segments — fixed columns by activity type ────────────────
-  // Pre-fill every slot with empty strings so the column always exists.
-  for (const act of MAINT_ACTIVITIES) {
-    for (let s = 1; s <= MAX_MAINT_SLOTS; s++) {
-      row[`${act.abbr}${s}_From_yr`] = "";
-      row[`${act.abbr}${s}_To_yr`]   = "";
-      row[`${act.abbr}${s}_USD_yr`]  = "";
-    }
-  }
-  // Fill from actual segments, bucketing by activity label.
-  const slotIdx: Record<string, number> = {};
-  for (const seg of (m?.maintenanceSegments ?? [])) {
-    const act = MAINT_ACTIVITIES.find((a) => a.label === seg.label);
-    if (!act) continue; // unknown label — skip
-    slotIdx[act.abbr] = (slotIdx[act.abbr] ?? 0) + 1;
-    const s = slotIdx[act.abbr];
-    if (s > MAX_MAINT_SLOTS) continue; // exceeded cap — extra occurrences ignored
-    row[`${act.abbr}${s}_From_yr`] = seg.yearFrom ?? "";
-    row[`${act.abbr}${s}_To_yr`]   = seg.yearTo   ?? "";
-    row[`${act.abbr}${s}_USD_yr`]  = seg.cost      ?? "";
-  }
+  m?.maintenanceSegments?.forEach((segment, index) => {
+    const n = index + 1;
+    row[`MaintSeg${n}_Name`] = segment.label ?? "";
+    row[`MaintSeg${n}_From_yr`] = segment.yearFrom ?? 0;
+    row[`MaintSeg${n}_To_yr`] = segment.yearTo ?? 0;
+    row[`MaintSeg${n}_Annual_USD`] = segment.cost ?? 0;
+  });
 
-  // ── Productivity segments — fixed 3 slots, free-text label ───────────────
-  for (let i = 1; i <= MAX_PROD_SEGS; i++) {
-    const seg = m?.ntfpProductivitySegments?.[i - 1];
-    row[`Prod${i}_Name`]     = seg?.label        ?? "";
-    row[`Prod${i}_From_yr`]  = seg?.yearFrom     ?? "";
-    row[`Prod${i}_To_yr`]    = seg?.yearTo       ?? "";
-    row[`Prod${i}_kg_ha_yr`] = seg?.productivity ?? "";
-  }
+  m?.ntfpProductivitySegments?.forEach((segment, index) => {
+    const n = index + 1;
+    row[`ProdSeg${n}_Name`] = segment.label ?? "";
+    row[`ProdSeg${n}_From_yr`] = segment.yearFrom ?? 0;
+    row[`ProdSeg${n}_To_yr`] = segment.yearTo ?? 0;
+    row[`ProdSeg${n}_kg_ha_yr`] = segment.productivity ?? 0;
+  });
 
-  // ── Revenue segments — fixed 3 slots, free-text label ────────────────────
-  for (let i = 1; i <= MAX_REV_SEGS; i++) {
-    const seg = m?.ntfpRevenueSegments?.[i - 1];
-    row[`Rev${i}_Name`]    = seg?.label   ?? "";
-    row[`Rev${i}_From_yr`] = seg?.yearFrom ?? "";
-    row[`Rev${i}_To_yr`]   = seg?.yearTo   ?? "";
-    row[`Rev${i}_USD_yr`]  = seg?.revenue  ?? "";
-  }
+  m?.ntfpRevenueSegments?.forEach((segment, index) => {
+    const n = index + 1;
+    row[`RevSeg${n}_Name`] = segment.label ?? "";
+    row[`RevSeg${n}_From_yr`] = segment.yearFrom ?? 0;
+    row[`RevSeg${n}_To_yr`] = segment.yearTo ?? 0;
+    row[`RevSeg${n}_Annual_USD`] = segment.revenue ?? 0;
+  });
 
   return row;
 }
@@ -341,9 +299,13 @@ function buildExcelRows(d: RestorationModel): Row[] {
   const shared = buildSharedColumns(d);
   const answeredMethods = METHOD_KEYS.filter((mk) => !disabled.has(mk));
 
-  // If no methods answered, still export one row with shared data + blank method columns
+  // If no methods answered, still export one row with shared data
   if (answeredMethods.length === 0) {
-    return [{ ...shared, ...buildMethodColumns(METHOD_KEYS[0], { ...d, methodCosts: undefined as any }) }];
+    return [{ ...shared, Method: "", Method_ID: "", Is_NTFP: "", "Enrichment_%": 0,
+      Impl_USD: 0, Maint_USD: 0, IntMaint_Start_yr: 0, IntMaint_End_yr: 0, IntMaint_USD: 0,
+      "Impl_Labor_%": 0, "Impl_Mater_%": 0, "Impl_Mach_%": 0,
+      "Maint_Labor_%": 0, "Maint_Mater_%": 0, "Maint_Mach_%": 0,
+      NTFP_Species: "", NTFP_Productiv_kg: 0, NTFP_Price_USD: 0, NTFP_Revenue_USD: 0 }];
   }
 
   return answeredMethods.map((mk) => ({

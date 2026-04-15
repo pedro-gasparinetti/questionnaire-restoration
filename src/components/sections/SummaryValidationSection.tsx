@@ -13,11 +13,14 @@
 
 import { useWatch, useFormContext } from "react-hook-form";
 import { AlertTriangle, CheckCircle2 } from "lucide-react";
+import {
+  BarChart, Bar, XAxis, YAxis, Tooltip,
+  Legend, ResponsiveContainer, Cell,
+} from "recharts";
 import type { RestorationModelFormData } from "../../schemas";
 import type { ComputedFields, MethodCostEntry, FactorShares, ContextConstraintEntry } from "../../types";
 import { METHOD_TABS } from "../../constants";
 import { CollapsibleSection, SummaryTable } from "../ui";
-import type { SummaryRow } from "../ui";
 import { formatUSD } from "../../utils";
 
 // ---------------------------------------------------------------------------
@@ -37,10 +40,6 @@ const CONSTRAINT_META: Record<string, { label: string; unit: string }> = {
 
 function fmt(v: number): string {
   return v.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-}
-
-function pct(v: number): string {
-  return `${fmt(v)}%`;
 }
 
 function sharesSum(s: FactorShares): number {
@@ -213,26 +212,111 @@ export function SummaryValidationSection(_props: Props) {
 // ---------------------------------------------------------------------------
 
 function MethodSummaryBlock({ summary: m }: { summary: MethodSummary }) {
+  // ── Cost bar chart data (horizontal) ──────────────────────────────────
+  const costBars = [
+    { name: "Implementation", value: m.implCost, fill: "#2A4B46" },
+    { name: "Maintenance", value: m.maintCost, fill: "#4E8465" },
+    ...m.constraints
+      .filter((c) => c.totalCost > 0)
+      .map((c) => ({ name: c.label.split(" / ")[0], value: c.totalCost, fill: "#c0602a" })),
+  ].filter((d) => d.value > 0);
+
+  // ── Factor shares data (stacked horizontal bar) ───────────────────────
+  const shareData = [
+    {
+      name: "Favorable",
+      labor: Number(m.favorableShares.labor) || 0,
+      materials: Number(m.favorableShares.materials) || 0,
+      machinery: Number(m.favorableShares.machinery) || 0,
+    },
+    {
+      name: "Unfavorable",
+      labor: Number(m.unfavourableShares.labor) || 0,
+      materials: Number(m.unfavourableShares.materials) || 0,
+      machinery: Number(m.unfavourableShares.machinery) || 0,
+    },
+  ];
+
+  const favOk = sharesSumOk(m.favorableShares);
+  const unfavOk = sharesSumOk(m.unfavourableShares);
+
   return (
     <div className="summary-method-block">
       <h4 className="summary-method-title">{m.title}</h4>
 
-      {/* Section 1 — Favorable Scenario */}
-      <SummaryTable
-        caption="Favorable Scenario"
-        headers={["Cost Component", "Value (US$/ha)"]}
-        rows={[
-          { label: "Basic Implementation Cost (Year 1)", values: [formatUSD(m.implCost)] },
-          { label: "Basic Maintenance Cost (Years 2–20)", values: [formatUSD(m.maintCost)] },
-          {
-            label: "Total Favorable Scenario Cost",
-            values: [formatUSD(m.totalFavorable)],
-            className: "summary-table-total",
-          },
-        ]}
-      />
+      {/* ── Visual summary row ──────────────────────────────────────────── */}
+      <div className="summary-charts-row">
 
-      {/* Section 2 — Context Constraints & Additional Costs */}
+        {/* Cost breakdown bar chart */}
+        <div className="summary-chart-col">
+          <p className="summary-chart-label">Cost Breakdown (US$/ha)</p>
+          <ResponsiveContainer width="100%" height={Math.max(100, costBars.length * 36 + 24)}>
+            <BarChart
+              data={costBars}
+              layout="vertical"
+              margin={{ top: 2, right: 80, left: 8, bottom: 2 }}
+              barSize={18}
+            >
+              <XAxis
+                type="number"
+                tickFormatter={(v: number) =>
+                  v >= 1000 ? `$${(v / 1000).toFixed(0)}k` : `$${v.toFixed(0)}`
+                }
+                tick={{ fontSize: 10 }}
+              />
+              <YAxis type="category" dataKey="name" tick={{ fontSize: 11 }} width={110} />
+              <Tooltip formatter={(v) => [formatUSD(Number(v)), ""]} />
+              <Bar dataKey="value" radius={[0, 3, 3, 0]}>
+                {costBars.map((d, i) => (
+                  <Cell key={i} fill={d.fill} />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+          {/* Totals */}
+          <div className="summary-cost-totals">
+            <span>Favorable: <strong>{formatUSD(m.totalFavorable)}</strong></span>
+            <span>Unfavorable: <strong>{formatUSD(m.computedUnfavourable)}</strong></span>
+          </div>
+        </div>
+
+        {/* Factor shares stacked bar */}
+        <div className="summary-chart-col">
+          <p className="summary-chart-label">Production Factors (%)</p>
+          <ResponsiveContainer width="100%" height={100}>
+            <BarChart
+              data={shareData}
+              layout="vertical"
+              margin={{ top: 2, right: 24, left: 8, bottom: 2 }}
+              barSize={22}
+            >
+              <XAxis
+                type="number"
+                domain={[0, 100]}
+                tickFormatter={(v: number) => `${v}%`}
+                tick={{ fontSize: 10 }}
+              />
+              <YAxis type="category" dataKey="name" tick={{ fontSize: 11 }} width={80} />
+              <Tooltip formatter={(v, name) => [`${Number(v).toFixed(1)}%`, name]} />
+              <Legend wrapperStyle={{ fontSize: 10 }} />
+              <Bar dataKey="labor" stackId="f" fill="#4E8465" name="Labor" />
+              <Bar dataKey="materials" stackId="f" fill="#A8C2B4" name="Materials" />
+              <Bar dataKey="machinery" stackId="f" fill="#2A4B46" name="Machinery" />
+            </BarChart>
+          </ResponsiveContainer>
+          {(!favOk || !unfavOk) && (
+            <p className="summary-warning" style={{ marginTop: "0.35rem", marginBottom: 0 }}>
+              <AlertTriangle size={13} />
+              {!favOk ? " Favorable" : ""}
+              {!favOk && !unfavOk ? " &" : ""}
+              {!unfavOk ? " Unfavorable" : ""} factor shares don't sum to 100%.
+            </p>
+          )}
+        </div>
+
+      </div>{/* end summary-charts-row */}
+
+      {/* Context Constraints & Additional Costs — kept as table (detailed data) */}
       <SummaryTable
         caption="Context Constraints &amp; Additional Costs"
         headers={["Constraint", "Unit Cost", "Occurrences / Area", "Firebreak Area (ha)", "Total Cost"]}
@@ -257,94 +341,8 @@ function MethodSummaryBlock({ summary: m }: { summary: MethodSummary }) {
           },
         ]}
       />
-
-      {/* Section 3 — Unfavourable Scenario */}
-      <UnfavourableBlock summary={m} />
-
-      {/* Production Factor Breakdown */}
-      <FactorBreakdownBlock summary={m} />
     </div>
   );
 }
 
-// ---------------------------------------------------------------------------
-// Unfavourable Scenario table
-// ---------------------------------------------------------------------------
-
-function UnfavourableBlock({ summary: m }: { summary: MethodSummary }) {
-  return (
-    <SummaryTable
-      caption="Unfavourable Scenario"
-      headers={["Cost Component", "Value (US$/ha)"]}
-      rows={[
-        { label: "Total Favorable Scenario Cost", values: [formatUSD(m.totalFavorable)] },
-        { label: "Total Additional Cost (Constraints)", values: [formatUSD(m.totalAdditional)] },
-        {
-          label: "Computed Unfavourable Cost",
-          values: [formatUSD(m.computedUnfavourable)],
-          className: "summary-table-total",
-        },
-      ]}
-    />
-  );
-}
-
-// ---------------------------------------------------------------------------
-// Production Factor Breakdown table
-// ---------------------------------------------------------------------------
-
-function FactorBreakdownBlock({ summary: m }: { summary: MethodSummary }) {
-  const favOk = sharesSumOk(m.favorableShares);
-  const unfavOk = sharesSumOk(m.unfavourableShares);
-
-  const mkRow = (
-    label: string,
-    shares: FactorShares,
-    totalCost: number,
-    ok: boolean
-  ): SummaryRow => ({
-    label,
-    values: [
-      pct(shares.labor),
-      pct(shares.materials),
-      pct(shares.machinery),
-      formatUSD(totalCost * (Number(shares.labor) || 0) / 100),
-      formatUSD(totalCost * (Number(shares.materials) || 0) / 100),
-      formatUSD(totalCost * (Number(shares.machinery) || 0) / 100),
-    ],
-    className: ok ? "" : "summary-row-warn",
-  });
-
-  return (
-    <>
-      <SummaryTable
-        caption="Production Factor Breakdown"
-        headers={[
-          "Scenario",
-          "Labor (%)",
-          "Materials (%)",
-          "Machinery (%)",
-          "Labor (US$/ha)",
-          "Materials (US$/ha)",
-          "Machinery (US$/ha)",
-        ]}
-        rows={[
-          mkRow("Favorable Scenario", m.favorableShares, m.totalFavorable, favOk),
-          mkRow("Unfavourable Scenario", m.unfavourableShares, m.computedUnfavourable, unfavOk),
-        ]}
-      />
-      {!favOk && (
-        <p className="summary-warning">
-          <AlertTriangle size={14} /> Favorable scenario factor shares do not sum to 100%.
-          Please review cost distributions in the Method Costs section.
-        </p>
-      )}
-      {!unfavOk && (
-        <p className="summary-warning">
-          <AlertTriangle size={14} /> Unfavourable scenario factor shares do not sum to 100%.
-          Please review constraint cost distributions.
-        </p>
-      )}
-    </>
-  );
-}
+// (UnfavourableBlock and FactorBreakdownBlock replaced by inline charts in MethodSummaryBlock)

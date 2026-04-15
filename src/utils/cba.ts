@@ -16,7 +16,7 @@ import * as XLSX from "xlsx";
 // ---------------------------------------------------------------------------
 
 const DISCOUNT_RATES = [0.03, 0.06, 0.08, 0.10, 0.12];
-const DEFAULT_DISCOUNT_RATE = 0.06;
+export const DEFAULT_DISCOUNT_RATE = 0.06;
 
 /** Carbon price US$/tCO2 — default for main analysis + range for sensitivity */
 const CARBON_PRICE = 10;
@@ -61,7 +61,7 @@ const METHOD_LABELS: Record<string, string> = {
 // Types
 // ---------------------------------------------------------------------------
 
-interface YearCashFlow {
+export interface YearCashFlow {
   year: number;
   projectYear: number;
   implCost: number;
@@ -78,7 +78,7 @@ interface YearCashFlow {
   cumulativeDiscountedNet: number;
 }
 
-interface MethodCBA {
+export interface MethodCBA {
   methodId: string;
   methodLabel: string;
   isNtfp: boolean;
@@ -323,7 +323,7 @@ function buildCashFlows(
 /**
  * Compute full CBA for one method.
  */
-function computeMethodCBA(
+export function computeMethodCBA(
   methodId: string,
   method: MethodCostEntry,
   data: RestorationModel,
@@ -372,7 +372,7 @@ function computeMethodCBA(
 // Excel export
 // ---------------------------------------------------------------------------
 
-const METHOD_KEYS: MethodType[] = [
+export const METHOD_KEYS: MethodType[] = [
   "anr_30", "anr_30_ntfp",
   "seed_dispersal", "seed_dispersal_ntfp",
   "seedling_planting", "seedling_planting_ntfp",

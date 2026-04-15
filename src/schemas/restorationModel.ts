@@ -22,21 +22,22 @@ import { z } from "zod";
 // Reusable sub-schemas
 // ---------------------------------------------------------------------------
 
-/** Factor shares must sum to exactly 100%. Sum is validated via custom UI warnings. */
-export const factorSharesSchema = z.object({
-  labor: z
-    .number({ message: "Labor % is required" })
-    .min(0, "Cannot be negative")
-    .max(100, "Cannot exceed 100%"),
-  materials: z
-    .number({ message: "Materials % is required" })
-    .min(0, "Cannot be negative")
-    .max(100, "Cannot exceed 100%"),
-  machinery: z
-    .number({ message: "Machinery % is required" })
-    .min(0, "Cannot be negative")
-    .max(100, "Cannot exceed 100%"),
-});
+/** Factor shares must sum to exactly 100%. */
+export const factorSharesSchema = z
+  .object({
+    labor: z
+      .number({ message: "Labor % is required" })
+      .min(0, "Cannot be negative")
+      .max(100, "Cannot exceed 100%"),
+    materials: z
+      .number({ message: "Materials % is required" })
+      .min(0, "Cannot be negative")
+      .max(100, "Cannot exceed 100%"),
+    machinery: z
+      .number({ message: "Machinery % is required" })
+      .min(0, "Cannot be negative")
+      .max(100, "Cannot exceed 100%"),
+  });
 
 // ---------------------------------------------------------------------------
 // Scenario Costs (used for both favorable and unfavorable)
@@ -53,34 +54,28 @@ export const scenarioCostsSchema = z
     maintenanceCost: z
       .number({ message: "Maintenance cost is required" })
       .min(0, "Cannot be negative"),
-  })
-  .refine(
-    (d) => Math.abs(d.totalCost - (d.implementationCost + d.maintenanceCost)) < 0.01,
-    {
-      message: "Total cost must equal Implementation + Maintenance",
-      path: ["totalCost"],
-    }
-  );
+  });
 
 // ---------------------------------------------------------------------------
 // Cost Distribution (reuses factor-shares structure)
 // ---------------------------------------------------------------------------
 
-/** Cost distribution across labor / machinery / materials — must sum to 100%. Sum is validated via custom UI warnings. */
-export const costDistributionSchema = z.object({
-  labor: z
-    .number({ message: "Labor % is required" })
-    .min(0, "Cannot be negative")
-    .max(100, "Cannot exceed 100%"),
-  materials: z
-    .number({ message: "Materials % is required" })
-    .min(0, "Cannot be negative")
-    .max(100, "Cannot exceed 100%"),
-  machinery: z
-    .number({ message: "Machinery % is required" })
-    .min(0, "Cannot be negative")
-    .max(100, "Cannot exceed 100%"),
-});
+/** Cost distribution across labor / machinery / materials — must sum to 100%. */
+export const costDistributionSchema = z
+  .object({
+    labor: z
+      .number({ message: "Labor % is required" })
+      .min(0, "Cannot be negative")
+      .max(100, "Cannot exceed 100%"),
+    materials: z
+      .number({ message: "Materials % is required" })
+      .min(0, "Cannot be negative")
+      .max(100, "Cannot exceed 100%"),
+    machinery: z
+      .number({ message: "Machinery % is required" })
+      .min(0, "Cannot be negative")
+      .max(100, "Cannot exceed 100%"),
+  });
 
 export const yearRangeSegmentSchema = z.object({
   id: z.string().min(1, "Segment id is required"),
