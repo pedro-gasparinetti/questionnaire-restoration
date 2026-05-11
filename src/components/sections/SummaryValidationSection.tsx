@@ -18,7 +18,7 @@ import {
   Legend, ResponsiveContainer, Cell,
 } from "recharts";
 import type { RestorationModelFormData } from "../../schemas";
-import type { ComputedFields, MethodCostEntry, FactorShares, ContextConstraintEntry } from "../../types";
+import type { MethodCostEntry, FactorShares, ContextConstraintEntry } from "../../types";
 import { METHOD_TABS } from "../../constants";
 import { CollapsibleSection, SummaryTable } from "../ui";
 import { formatUSD } from "../../utils";
@@ -67,15 +67,6 @@ function weightedShares(
 }
 
 // ---------------------------------------------------------------------------
-// Props
-// ---------------------------------------------------------------------------
-
-interface Props {
-  values: RestorationModelFormData;
-  computed: ComputedFields;
-}
-
-// ---------------------------------------------------------------------------
 // Per-method summary data derived from form state
 // ---------------------------------------------------------------------------
 
@@ -107,7 +98,7 @@ interface MethodSummary {
 // Component
 // ---------------------------------------------------------------------------
 
-export function SummaryValidationSection(_props: Props) {
+export function SummaryValidationSection() {
   const { control } = useFormContext<RestorationModelFormData>();
 
   // useWatch subscribes to nested field changes and triggers re-renders

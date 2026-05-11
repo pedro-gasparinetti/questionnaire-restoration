@@ -4,9 +4,6 @@
 
 import type { RestorationModelFormData } from "../schemas";
 
-/** Tolerance for unfavorable cost reconciliation (5%) */
-export const RECONCILIATION_TOLERANCE = 0.05;
-
 /** Default time horizon in years */
 export const DEFAULT_TIME_HORIZON = 20;
 
@@ -144,20 +141,6 @@ export function getMethodLabel(methodType: string): string {
   return METHOD_TABS.find((t) => t.id === methodType)?.title || methodType;
 }
 
-/**
- * Available assistance activity types.
- * Each entry has an id (form value) and a display label.
- * These are the activities that may be required in the unfavorable scenario.
- */
-export const ASSISTANCE_TYPES = [
-  { id: "fencing", label: "Fencing" },
-  { id: "firebreak", label: "Firebreak" },
-  { id: "soilRecovery", label: "Soil recovery" },
-  { id: "invasiveControl", label: "Invasive species control" },
-  { id: "cattleManagement", label: "Cattle management" },
-  { id: "enrichmentPlanting", label: "Enrichment planting" },
-] as const;
-
 /** Local storage key for saved models */
 export const STORAGE_KEY = "restoration-calculator-models";
 
@@ -174,9 +157,6 @@ export const EMPTY_METHOD_COST_ENTRY = {
   implementationDistribution: { ...EMPTY_COST_DISTRIBUTION },
   maintenanceCost: 0,
   maintenanceDistribution: { ...EMPTY_COST_DISTRIBUTION },
-  intensiveMaintenanceStartYear: 3,
-  intensiveMaintenanceEndYear: 6,
-  intensiveMaintenanceCost: 0,
   ntfpSpecies: "",
   ntfpProductivity: 0,
   ntfpPrice: 0,
@@ -189,27 +169,12 @@ export const EMPTY_METHOD_COST_ENTRY = {
 
 /** Default empty method costs for all tabs */
 export const EMPTY_METHOD_COSTS = {
-  natural_regeneration: { ...EMPTY_METHOD_COST_ENTRY },
   anr_30: { ...EMPTY_METHOD_COST_ENTRY },
   anr_30_ntfp: { ...EMPTY_METHOD_COST_ENTRY },
   seed_dispersal: { ...EMPTY_METHOD_COST_ENTRY },
   seed_dispersal_ntfp: { ...EMPTY_METHOD_COST_ENTRY },
   seedling_planting: { ...EMPTY_METHOD_COST_ENTRY },
   seedling_planting_ntfp: { ...EMPTY_METHOD_COST_ENTRY },
-};
-
-/** Empty factor shares */
-export const EMPTY_FACTOR_SHARES = {
-  labor: 0,
-  materials: 0,
-  machinery: 0,
-};
-
-/** Empty scenario costs */
-export const EMPTY_SCENARIO_COSTS = {
-  totalCost: 0,
-  implementationCost: 0,
-  maintenanceCost: 0,
 };
 
 /** Empty context constraint entry */
@@ -240,12 +205,6 @@ export const DEFAULT_FORM_VALUES: RestorationModelFormData = {
     invasiveSpeciesPressure: { ...EMPTY_CONTEXT_CONSTRAINT },
     antInfestation: { ...EMPTY_CONTEXT_CONSTRAINT },
   },
-  selectedAssistances: [],
-  favorableScenario: { ...EMPTY_SCENARIO_COSTS },
-  unfavorableScenario: { ...EMPTY_SCENARIO_COSTS },
-  assistanceCosts: [],
-  interactionAdjustment: 0,
-  favorableFactorShares: { ...EMPTY_FACTOR_SHARES },
   laborBreakdown: {
     implementation: { hiredLabor: 0, familyLabor: 0 },
     maintenance: { hiredLabor: 0, familyLabor: 0 },

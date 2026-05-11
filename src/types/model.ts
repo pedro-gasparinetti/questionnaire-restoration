@@ -72,37 +72,8 @@ export interface ProductivitySegment extends YearRangeSegment {
 }
 
 // ---------------------------------------------------------------------------
-// Scenario Cost Structure
-// ---------------------------------------------------------------------------
-
-/**
- * Cost structure for a single scenario (favorable or unfavorable).
- * All figures in US$/ha over the full time horizon.
- *
- * Validation invariant:
- *   totalCost === implementationCost + maintenanceCost
- */
-export interface ScenarioCosts {
-  /** Total cost over the full time horizon (US$/ha) */
-  totalCost: number;
-  /** Implementation cost — year 1 only (US$/ha) */
-  implementationCost: number;
-  /** Maintenance cost — years 2 through T (US$/ha) */
-  maintenanceCost: number;
-}
-
-// ---------------------------------------------------------------------------
 // Context Variables
 // ---------------------------------------------------------------------------
-
-/** Categorical severity levels used for most context dimensions */
-export type SeverityLevel = "low" | "medium" | "high";
-
-/** Categorical levels for soil degradation */
-export type SoilDegradationLevel = "none" | "moderate" | "severe";
-
-/** Binary availability constraint */
-export type BinaryConstraint = "yes" | "no";
 
 /**
  * A single context constraint entry — captures the estimated cost,
@@ -144,7 +115,6 @@ export interface ContextVariables {
  * that determines the enrichment intensity and expected soil/propagule conditions.
  */
 export type MethodType =
-  | "natural_regeneration"
   | "anr_30"
   | "anr_30_ntfp"
   | "seed_dispersal"
@@ -175,12 +145,6 @@ export interface MethodCostEntry {
   maintenanceCost: number;
   /** Factor-of-production distribution for maintenance cost */
   maintenanceDistribution: FactorShares;
-  /** Start year of the intensive maintenance period (1–30) */
-  intensiveMaintenanceStartYear: number;
-  /** End year of the intensive maintenance period (1–30) */
-  intensiveMaintenanceEndYear: number;
-  /** Cost for the intensive maintenance period (US$/ha) */
-  intensiveMaintenanceCost: number;
   /** NTFP species selected for harvesting (only for NTFP method variants) */
   ntfpSpecies?: string;
   /**
@@ -215,31 +179,6 @@ export interface MethodCostEntry {
  * Record mapping each method type to its baseline cost entry.
  */
 export type MethodCosts = Record<MethodType, MethodCostEntry>;
-
-// ---------------------------------------------------------------------------
-// Assistance Activity Cost
-// ---------------------------------------------------------------------------
-
-/**
- * An assistance activity represents an additive cost component that is
- * required in the unfavorable scenario to achieve the same ecological outcome
- * as the favorable scenario.
- *
- * Cost additivity:
- *   C_unfavorable ≈ C_favorable + Σ_a C_a + interaction
- *
- * Each assistance has its own factor shares for regional extrapolation.
- */
-export interface AssistanceCost {
-  /** Activity name (e.g., "Fencing", "Firebreak") — matches a selected activity */
-  name: string;
-  /** Cost in US$/ha */
-  cost: number;
-  /** When the cost is incurred */
-  phase: "implementation" | "maintenance" | "both";
-  /** Breakdown by factor of production (must sum to 100%) */
-  factorShares: FactorShares;
-}
 
 // ---------------------------------------------------------------------------
 // Main Restoration Model
@@ -282,30 +221,9 @@ export interface RestorationModel {
   /** Baseline implementation + maintenance costs for ALL four method tabs */
   methodCosts: MethodCosts;
 
-  // ---- Context & Scenario Definition ----
+  // ---- Context Constraints (shared across all methods) ----
   /** Contextual conditions that describe the local site */
   contextVariables: ContextVariables;
-  /** Assistance activities required in the unfavorable scenario */
-  selectedAssistances: string[];
-
-  // ---- Cost Estimates ----
-  /** Cost under favorable conditions (no extra assistance) */
-  favorableScenario: ScenarioCosts;
-  /** Cost under unfavorable conditions (with all selected assistances) */
-  unfavorableScenario: ScenarioCosts;
-
-  // ---- Assistance Breakdown ----
-  /** Individual cost for each selected assistance activity */
-  assistanceCosts: AssistanceCost[];
-  /**
-   * Adjustment term (positive or negative) that accounts for cost interactions
-   * between combined assistance activities. Reconciles additive model with reality.
-   */
-  interactionAdjustment: number;
-
-  // ---- Factor Shares ----
-  /** Factor shares for the favorable base cost */
-  favorableFactorShares: FactorShares;
 
   // ---- Labor Breakdown ----
   /** Breakdown of labor hours into hired vs family labor (must sum to 100% each) */
@@ -356,31 +274,4 @@ export interface GenderDistribution {
   female: number;
   /** Percentage of labor hours from non-binary / other (0–100) */
   other: number;
-}
-
-// ---------------------------------------------------------------------------
-// Computed Fields (derived at runtime, never stored directly)
-// ---------------------------------------------------------------------------
-
-/**
- * Computed summary values derived from the model data.
- * These are recalculated on every form change for validation and display.
- */
-export interface ComputedFields {
-  /** Sum of all individual assistance costs (US$/ha) */
-  totalAssistanceCost: number;
-  /** favorableCost + totalAssistanceCost + interactionAdjustment */
-  computedUnfavorableCost: number;
-  /** declaredUnfavorableCost − computedUnfavorableCost */
-  differenceFromDeclared: number;
-  /** Whether the difference is within acceptable tolerance (default: 5%) */
-  isWithinTolerance: boolean;
-  /** Per-assistance cost breakdown for display */
-  costBreakdownSummary: CostBreakdownItem[];
-}
-
-export interface CostBreakdownItem {
-  name: string;
-  costPerHa: number;
-  phase: string;
 }

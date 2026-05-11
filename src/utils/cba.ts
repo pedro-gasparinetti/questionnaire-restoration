@@ -165,23 +165,13 @@ function buildMaintenanceCostMap(method: MethodCostEntry, horizon: number): Reco
     return addSegmentSeries(maintenanceByYear, segments, (segment) => (segment as { cost?: number }).cost ?? 0);
   }
 
+  // Fallback: spread the (derived) maintenance total uniformly across years 2..horizon.
   const maintCostTotal = method.maintenanceCost || 0;
-  const intMaintStart = method.intensiveMaintenanceStartYear || 0;
-  const intMaintEnd = method.intensiveMaintenanceEndYear || 0;
-  const intMaintCost = method.intensiveMaintenanceCost || 0;
-  const maintYears = horizon - 1;
-  const intMaintYears = intMaintEnd >= intMaintStart ? intMaintEnd - intMaintStart + 1 : 0;
-  const normalMaintYears = Math.max(0, maintYears - intMaintYears);
-  const normalMaintTotal = Math.max(0, maintCostTotal - intMaintCost);
-  const normalMaintPerYear = normalMaintYears > 0 ? normalMaintTotal / normalMaintYears : 0;
-  const intMaintPerYear = intMaintYears > 0 ? intMaintCost / intMaintYears : 0;
-
+  const maintYears = Math.max(0, horizon - 1);
+  const perYear = maintYears > 0 ? maintCostTotal / maintYears : 0;
   for (let year = 2; year <= horizon; year++) {
-    maintenanceByYear[year] = intMaintYears > 0 && year >= intMaintStart && year <= intMaintEnd
-      ? intMaintPerYear
-      : normalMaintPerYear;
+    maintenanceByYear[year] = perYear;
   }
-
   return maintenanceByYear;
 }
 
