@@ -157,8 +157,13 @@ export function RevenueTimelineBuilder({ startYear = 2, maxYear = 20, value, onC
     onTotalChange(computeTotal(renumbered));
   };
 
-  const add = () =>
+  const MAX_SEGMENTS = 5;
+  const atLimit = segments.length >= MAX_SEGMENTS;
+
+  const add = () => {
+    if (atLimit) return;
     update([...segments, { id: `${uid}-${Date.now()}`, label: "", yearFrom: startYear, yearTo: maxYear, revenue: 0 }]);
+  };
 
   const remove = (id: string) => update(segments.filter((s) => s.id !== id));
   const patch  = (id: string, p: Partial<RevenueSegment>) =>
@@ -237,9 +242,17 @@ export function RevenueTimelineBuilder({ startYear = 2, maxYear = 20, value, onC
 
       <div className="cost-timeline-footer">
         <div className="cost-timeline-add-row">
-          <button type="button" className="cost-timeline-add revenue-add-btn" onClick={add}>+ Add revenue segment</button>
+          <button
+            type="button"
+            className="cost-timeline-add revenue-add-btn"
+            onClick={add}
+            disabled={atLimit}
+            style={atLimit ? { opacity: 0.5, cursor: "not-allowed" } : undefined}
+          >+ Add revenue segment</button>
           <span className="cost-timeline-add-hint">
-            Split the revenue period into segments with different annual revenues (e.g., early low-yield years vs. mature harvest years).
+            {atLimit
+              ? `Maximum of ${MAX_SEGMENTS} segments reached. Remove a segment to add a new one.`
+              : `Split the revenue period into segments with different annual revenues (e.g., early low-yield years vs. mature harvest years). Maximum ${MAX_SEGMENTS} segments.`}
           </span>
         </div>
         {segments.length > 0 && (

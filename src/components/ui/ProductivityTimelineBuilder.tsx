@@ -160,8 +160,13 @@ export function ProductivityTimelineBuilder({ startYear = 2, maxYear = 20, value
     onAverageChange(computeWeightedAvg(renumbered));
   };
 
-  const add = () =>
+  const MAX_SEGMENTS = 5;
+  const atLimit = segments.length >= MAX_SEGMENTS;
+
+  const add = () => {
+    if (atLimit) return;
     update([...segments, { id: `${uid}-${Date.now()}`, label: "", yearFrom: startYear, yearTo: maxYear, productivity: 0 }]);
+  };
 
   const remove = (id: string) => update(segments.filter((s) => s.id !== id));
   const patch  = (id: string, p: Partial<ProductivitySegment>) =>
@@ -240,9 +245,17 @@ export function ProductivityTimelineBuilder({ startYear = 2, maxYear = 20, value
 
       <div className="cost-timeline-footer">
         <div className="cost-timeline-add-row">
-          <button type="button" className="cost-timeline-add productivity-add-btn" onClick={add}>+ Add productivity segment</button>
+          <button
+            type="button"
+            className="cost-timeline-add productivity-add-btn"
+            onClick={add}
+            disabled={atLimit}
+            style={atLimit ? { opacity: 0.5, cursor: "not-allowed" } : undefined}
+          >+ Add productivity segment</button>
           <span className="cost-timeline-add-hint">
-            NTFP productivity typically increases as the forest matures. Add segments for different growth phases.
+            {atLimit
+              ? `Maximum of ${MAX_SEGMENTS} segments reached. Remove a segment to add a new one.`
+              : `NTFP productivity typically increases as the forest matures. Add segments for different growth phases. Maximum ${MAX_SEGMENTS} segments.`}
           </span>
         </div>
         {segments.length > 0 && (
