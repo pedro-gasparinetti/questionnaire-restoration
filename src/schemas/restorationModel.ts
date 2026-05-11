@@ -168,6 +168,7 @@ export const methodCostEntrySchema = z.object({
   ntfpProductivity: z.number().min(0, "Cannot be negative").optional().default(0),
   ntfpPrice: z.number().min(0, "Cannot be negative").optional().default(0),
   ntfpRevenue: z.number().min(0, "Cannot be negative").optional().default(0),
+  ntfpDataMode: z.enum(["production", "revenue"]).optional().default("production"),
   maintenanceSegments: z.array(costSegmentSchema).optional().default([]),
   ntfpProductivitySegments: z.array(productivitySegmentSchema).optional().default([]),
   ntfpRevenueSegments: z.array(revenueSegmentSchema).optional().default([]),

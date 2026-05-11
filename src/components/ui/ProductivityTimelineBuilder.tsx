@@ -154,8 +154,10 @@ export function ProductivityTimelineBuilder({ startYear = 2, maxYear = 20, value
   };
 
   const update = (updated: ProductivitySegment[]) => {
-    onChange(updated);
-    onAverageChange(computeWeightedAvg(updated));
+    // Auto-number labels so the visible segment names always match their position
+    const renumbered = updated.map((s, i) => ({ ...s, label: `Segment ${i + 1}` }));
+    onChange(renumbered);
+    onAverageChange(computeWeightedAvg(renumbered));
   };
 
   const add = () =>
@@ -182,10 +184,7 @@ export function ProductivityTimelineBuilder({ startYear = 2, maxYear = 20, value
 
             <div className="cost-timeline-field cost-timeline-field--label">
               <label className="cost-timeline-input-label">Name</label>
-              <input type="text" className="cost-timeline-input"
-                placeholder={`Segment ${i + 1}`}
-                value={seg.label}
-                onChange={(e) => patch(seg.id, { label: e.target.value })} />
+              <span className="cost-timeline-input cost-timeline-input--readonly">{`Segment ${i + 1}`}</span>
             </div>
 
             <div className="cost-timeline-field cost-timeline-field--year">

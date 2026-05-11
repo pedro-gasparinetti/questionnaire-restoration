@@ -185,6 +185,12 @@ export interface MethodCostEntry {
   ntfpPrice?: number;
   /** Total NTFP revenue in US$/ha (computed from timeline or manual) */
   ntfpRevenue?: number;
+  /**
+   * Which NTFP data the user is providing (only for NTFP method variants).
+   * "production" -> user fills productivity segments + price (revenue is derived);
+   * "revenue"    -> user fills revenue segments directly.
+   */
+  ntfpDataMode?: "production" | "revenue";
   /** Maintenance activities by year range, each with annual cost */
   maintenanceSegments?: CostSegment[];
   /** NTFP productivity by year range */

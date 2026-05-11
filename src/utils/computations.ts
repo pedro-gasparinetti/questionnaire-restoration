@@ -30,7 +30,7 @@ import { RECONCILIATION_TOLERANCE } from "../constants";
  */
 export function allMethodTabsComplete(methodCosts: MethodCosts | undefined): boolean {
   if (!methodCosts) return false;
-  const tabs = ["natural_regeneration", "anr_30", "anr_30_ntfp", "seed_dispersal", "seed_dispersal_ntfp", "seedling_planting", "seedling_planting_ntfp"] as const;
+  const tabs = ["anr_30", "anr_30_ntfp", "seed_dispersal", "seed_dispersal_ntfp", "seedling_planting", "seedling_planting_ntfp"] as const;
   return tabs.every((t) => {
     const entry = methodCosts[t];
     if (!entry || entry.implementationCost <= 0 || entry.maintenanceCost <= 0) return false;
@@ -50,7 +50,7 @@ export function allMethodTabsComplete(methodCosts: MethodCosts | undefined): boo
  */
 export function atLeastOneMethodTabComplete(methodCosts: MethodCosts | undefined): boolean {
   if (!methodCosts) return false;
-  const tabs = ["natural_regeneration", "anr_30", "anr_30_ntfp", "seed_dispersal", "seed_dispersal_ntfp", "seedling_planting", "seedling_planting_ntfp"] as const;
+  const tabs = ["anr_30", "anr_30_ntfp", "seed_dispersal", "seed_dispersal_ntfp", "seedling_planting", "seedling_planting_ntfp"] as const;
   return tabs.some((t) => {
     const entry = methodCosts[t];
     if (!entry || entry.implementationCost <= 0 || entry.maintenanceCost <= 0) return false;
@@ -278,6 +278,7 @@ function randMethodEntry(isNtfp: boolean) {
     ntfpProductivity: ntfp.ntfpProductivity,
     ntfpPrice: price,
     ntfpRevenue: ntfp.ntfpRevenue,
+    ntfpDataMode: "production" as const,
     ntfpProductivitySegments: ntfp.ntfpProductivitySegments,
     ntfpRevenueSegments: ntfp.ntfpRevenueSegments,
   };

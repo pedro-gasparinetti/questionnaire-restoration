@@ -181,6 +181,7 @@ export const EMPTY_METHOD_COST_ENTRY = {
   ntfpProductivity: 0,
   ntfpPrice: 0,
   ntfpRevenue: 0,
+  ntfpDataMode: "production" as const,
   maintenanceSegments: [],
   ntfpProductivitySegments: [],
   ntfpRevenueSegments: [],
