@@ -167,7 +167,11 @@ export interface MethodCostEntry {
   implementationCost: number;
   /** Factor-of-production distribution for implementation cost */
   implementationDistribution: FactorShares;
-  /** Maintenance cost — years 2 through T (US$/ha) */
+  /**
+   * Maintenance cost — years 2 through T (US$/ha).
+   * derived, do not edit directly — auto-computed from maintenanceSegments
+   * by CostTimelineBuilder via onTotalChange.
+   */
   maintenanceCost: number;
   /** Factor-of-production distribution for maintenance cost */
   maintenanceDistribution: FactorShares;
@@ -179,11 +183,19 @@ export interface MethodCostEntry {
   intensiveMaintenanceCost: number;
   /** NTFP species selected for harvesting (only for NTFP method variants) */
   ntfpSpecies?: string;
-  /** Average NTFP productivity in kg/ha (only for NTFP method variants) */
+  /**
+   * Average NTFP productivity in kg/ha (only for NTFP method variants).
+   * derived, do not edit directly — auto-computed from
+   * ntfpProductivitySegments by ProductivityTimelineBuilder via onAverageChange.
+   */
   ntfpProductivity?: number;
   /** Average NTFP price in US$/kg (only for NTFP method variants) */
   ntfpPrice?: number;
-  /** Total NTFP revenue in US$/ha (computed from timeline or manual) */
+  /**
+   * Total NTFP revenue in US$/ha (only for NTFP method variants).
+   * derived, do not edit directly — auto-computed from ntfpRevenueSegments
+   * by RevenueTimelineBuilder via onTotalChange.
+   */
   ntfpRevenue?: number;
   /**
    * Which NTFP data the user is providing (only for NTFP method variants).

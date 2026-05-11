@@ -1,13 +1,15 @@
 /**
- * CBAResultsSection – Visual Cost-Benefit Analysis results panel.
+ * CBAResultsSection – Illustrative Cost-Benefit Analysis results panel.
  *
  * Reads current form values, computes 20-year CBA projections for every
  * active (non-disabled) restoration method, and displays:
- *   — KPI summary cards: NPV, BCR, IRR, Payback Year, Cost/tCO₂
- *   — Cash Flow bar/line chart (costs below axis, benefits above, cumulative net line)
+ *   — KPI summary cards: NPV, BCR, IRR, Payback Year
  *   — Annual cost components (stacked bar: implementation / maintenance / constraints)
  *   — NPV sensitivity (bar chart across 5 discount rates)
  *   — 20-year totals footer row
+ *
+ * This panel is illustrative only — no download. The questionnaire data is
+ * exported through the main Export Excel button.
  */
 
 import { useMemo, useState } from "react";
@@ -21,8 +23,6 @@ import {
   Legend,
   ResponsiveContainer,
   ReferenceLine,
-  ComposedChart,
-  Line,
 } from "recharts";
 import { BarChart3 } from "lucide-react";
 import type { RestorationModelFormData } from "../../schemas";
@@ -32,15 +32,13 @@ import type { MethodCBA } from "../../utils/cba";
 import { CollapsibleSection } from "../ui";
 
 // ---------------------------------------------------------------------------
-// Palette (mirrors App.css green/cream design)
+// Palette — distinct colours per cost category for the stacked bar chart.
 // ---------------------------------------------------------------------------
 const PALETTE = {
-  impl:       "#c0392b",   // red – implementation cost
-  maint:      "#e74c3c",   // light red – maintenance
-  constraint: "#c0392b",   // red – constraint costs
-  ntfp:       "#27ae60",   // green – NTFP revenue
-  carbon:     "#82c99e",   // light green – carbon benefit
-  netLine:    "#1a3530",   // very dark – cumulative net
+  impl:       "#c0392b",   // red       – implementation cost
+  maint:      "#2596be",   // blue      – maintenance cost
+  constraint: "#f59e0b",   // amber     – constraint cost
+  netLine:    "#1a3530",   // very dark – reference line
   npvPos:     "#4E8465",
   npvNeg:     "#c0392b",
 };
@@ -136,13 +134,6 @@ function MethodCBAView({ cba }: { cba: MethodCBA }) {
 
   // Chart data ----------------------------------------------------------------
 
-  const cfData = cba.cashFlows.map((cf) => ({
-    year: `Y${cf.projectYear}`,
-    costs: -Math.abs(cf.totalCost),      // always negative (below zero axis)
-    ntfpRevenue: cf.ntfpRevenue,
-    cumulative: cf.cumulativeNet,
-  }));
-
   const costComponentsData = cba.cashFlows.map((cf) => ({
     year: `Y${cf.projectYear}`,
     implementation: cf.implCost,
@@ -188,50 +179,7 @@ function MethodCBAView({ cba }: { cba: MethodCBA }) {
         />
       </div>
 
-      {/* ── Chart 1: Cash Flow ───────────────────────────────────────────── */}
-      <div className="cba-chart-block">
-        <h4 className="cba-chart-title">Cash Flow</h4>
-        <p className="cba-chart-hint">
-          Costs shown below zero axis. NTFP revenues above. The cumulative net line 
-          (dark) crosses zero at the payback year.
-        </p>
-        <ResponsiveContainer width="100%" height={300}>
-          <ComposedChart
-            data={cfData}
-            margin={{ top: 12, right: 24, left: 12, bottom: 5 }}
-            barGap={-2}
-            barCategoryGap="22%"
-          >
-            <CartesianGrid strokeDasharray="3 3" stroke="#e8f0e9" />
-            <XAxis dataKey="year" tick={{ fontSize: 10 }} />
-            <YAxis
-              tickFormatter={(v: number) =>
-                `$${Math.abs(v) >= 1000 ? `${(v / 1000).toFixed(0)}k` : v.toFixed(0)}`
-              }
-              tick={{ fontSize: 10 }}
-            />
-            <Tooltip
-              formatter={(v, name) => [fmtUSD(Number(v)), String(name)]}
-              labelStyle={{ fontWeight: 700 }}
-            />
-            <Legend wrapperStyle={{ fontSize: 11, paddingTop: 8 }} />
-            <ReferenceLine y={0} stroke={PALETTE.netLine} strokeWidth={1.5} />
-            <Bar dataKey="costs" name="Total Costs" fill={PALETTE.constraint} opacity={0.85} />
-            <Bar dataKey="ntfpRevenue" name="NTFP Revenue" fill={PALETTE.ntfp} opacity={0.85} />
-            <Line
-              type="monotone"
-              dataKey="cumulative"
-              name="Cumulative Net"
-              stroke={PALETTE.netLine}
-              strokeWidth={2}
-              dot={false}
-              activeDot={{ r: 4 }}
-            />
-          </ComposedChart>
-        </ResponsiveContainer>
-      </div>
-
-      {/* ── Charts 2 + 3 in a 2-column row ──────────────────────────────── */}
+      {/* ── Charts (2-column row) ───────────────────────────────────────── */}
       <div className="cba-charts-2col">
 
         {/* Cost components stacked bar */}
