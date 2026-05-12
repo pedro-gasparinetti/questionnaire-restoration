@@ -151,12 +151,19 @@ export function RevenueTimelineBuilder({ startYear = 2, maxYear = 20, value, onC
   const segments = value;
 
   const update = (updated: RevenueSegment[]) => {
-    onChange(updated);
-    onTotalChange(computeTotal(updated));
+    // Auto-number labels so the visible segment names always match their position
+    const renumbered = updated.map((s, i) => ({ ...s, label: `Segment ${i + 1}` }));
+    onChange(renumbered);
+    onTotalChange(computeTotal(renumbered));
   };
 
-  const add = () =>
+  const MAX_SEGMENTS = 5;
+  const atLimit = segments.length >= MAX_SEGMENTS;
+
+  const add = () => {
+    if (atLimit) return;
     update([...segments, { id: `${uid}-${Date.now()}`, label: "", yearFrom: startYear, yearTo: maxYear, revenue: 0 }]);
+  };
 
   const remove = (id: string) => update(segments.filter((s) => s.id !== id));
   const patch  = (id: string, p: Partial<RevenueSegment>) =>
@@ -179,10 +186,7 @@ export function RevenueTimelineBuilder({ startYear = 2, maxYear = 20, value, onC
 
             <div className="cost-timeline-field cost-timeline-field--label">
               <label className="cost-timeline-input-label">Name</label>
-              <input type="text" className="cost-timeline-input"
-                placeholder={`Segment ${i + 1}`}
-                value={seg.label}
-                onChange={(e) => patch(seg.id, { label: e.target.value })} />
+              <span className="cost-timeline-input cost-timeline-input--readonly">{`Segment ${i + 1}`}</span>
             </div>
 
             <div className="cost-timeline-field cost-timeline-field--year">
@@ -238,9 +242,17 @@ export function RevenueTimelineBuilder({ startYear = 2, maxYear = 20, value, onC
 
       <div className="cost-timeline-footer">
         <div className="cost-timeline-add-row">
-          <button type="button" className="cost-timeline-add revenue-add-btn" onClick={add}>+ Add revenue segment</button>
+          <button
+            type="button"
+            className="cost-timeline-add revenue-add-btn"
+            onClick={add}
+            disabled={atLimit}
+            style={atLimit ? { opacity: 0.5, cursor: "not-allowed" } : undefined}
+          >+ Add revenue segment</button>
           <span className="cost-timeline-add-hint">
-            Split the revenue period into segments with different annual revenues (e.g., early low-yield years vs. mature harvest years).
+            {atLimit
+              ? `Maximum of ${MAX_SEGMENTS} segments reached. Remove a segment to add a new one.`
+              : `Split the revenue period into segments with different annual revenues (e.g., early low-yield years vs. mature harvest years). Maximum ${MAX_SEGMENTS} segments.`}
           </span>
         </div>
         {segments.length > 0 && (

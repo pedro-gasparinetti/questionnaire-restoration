@@ -176,13 +176,28 @@ export function CostTimelineBuilder({ startYear = 2, maxYear = 20, value, onChan
 
   const activities = isAnrEnrichment ? anrEnrichmentActivities : otherMethodActivities;
 
+  const MAX_PER_ACTIVITY = 10;
+
+  // Count segments per activity to enforce the per-activity cap.
+  const countsByActivity: Record<string, number> = {};
+  for (const a of activities) countsByActivity[a] = 0;
+  for (const seg of segments) {
+    if (seg.label && countsByActivity[seg.label] !== undefined) {
+      countsByActivity[seg.label] += 1;
+    }
+  }
+  const activitiesAtLimit = activities.filter((a) => countsByActivity[a] >= MAX_PER_ACTIVITY);
+  const allActivitiesFull = activitiesAtLimit.length === activities.length;
+
   const update = (updated: CostSegment[]) => {
     onChange(updated);
     onTotalChange(computeTotal(updated));
   };
 
-  const add = () =>
+  const add = () => {
+    if (allActivitiesFull) return;
     update([...segments, { id: `${uid}-${Date.now()}`, label: "", yearFrom: startYear, yearTo: maxYear, cost: 0 }]);
+  };
 
   const remove = (id: string) => update(segments.filter((s) => s.id !== id));
   const patch  = (id: string, p: Partial<CostSegment>) =>
@@ -211,9 +226,16 @@ export function CostTimelineBuilder({ startYear = 2, maxYear = 20, value, onChan
                 onChange={(e) => patch(seg.id, { label: e.target.value })}
               >
                 <option value="">Select activity...</option>
-                {activities.map((activity) => (
-                  <option key={activity} value={activity}>{activity}</option>
-                ))}
+                {activities.map((activity) => {
+                  // Disable activities at the cap unless this is already the segment's current selection.
+                  const isCurrent = seg.label === activity;
+                  const isFull = countsByActivity[activity] >= MAX_PER_ACTIVITY && !isCurrent;
+                  return (
+                    <option key={activity} value={activity} disabled={isFull}>
+                      {activity}{isFull ? ` (max ${MAX_PER_ACTIVITY} reached)` : ""}
+                    </option>
+                  );
+                })}
               </select>
             </div>
 
@@ -270,11 +292,24 @@ export function CostTimelineBuilder({ startYear = 2, maxYear = 20, value, onChan
 
       <div className="cost-timeline-footer">
         <div className="cost-timeline-add-row">
-          <button type="button" className="cost-timeline-add" onClick={add}>+ Add segment</button>
+          <button
+            type="button"
+            className="cost-timeline-add"
+            onClick={add}
+            disabled={allActivitiesFull}
+            style={allActivitiesFull ? { opacity: 0.5, cursor: "not-allowed" } : undefined}
+          >+ Add segment</button>
           <span className="cost-timeline-add-hint">
-            Split the maintenance period into segments with different annual costs (e.g., intensive years vs. later years).
+            {allActivitiesFull
+              ? `All activities are at the maximum of ${MAX_PER_ACTIVITY} segments. Remove a segment to add a new one.`
+              : `Split the maintenance period into segments with different annual costs (e.g., intensive years vs. later years). Maximum ${MAX_PER_ACTIVITY} segments per activity.`}
           </span>
         </div>
+        {activitiesAtLimit.length > 0 && !allActivitiesFull && (
+          <span className="cost-timeline-add-hint" style={{ color: "#b45309", fontSize: "0.78rem", display: "block", marginTop: "0.25rem" }}>
+            ⚠ Activities at the {MAX_PER_ACTIVITY}-segment limit: {activitiesAtLimit.map((a) => a.split(" (")[0]).join(", ")}
+          </span>
+        )}
         {segments.length > 0 && (
           <span className="cost-timeline-total">Accumulated total: <strong>US$ {formatUSD(total)}/ha</strong></span>
         )}

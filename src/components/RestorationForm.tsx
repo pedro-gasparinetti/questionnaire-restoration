@@ -12,7 +12,6 @@ import { useRef, useState } from "react";
 import { FormProvider } from "react-hook-form";
 import { Download, Upload } from "lucide-react";
 import { useRestorationForm } from "../hooks/useRestorationForm";
-import { useComputedFields } from "../hooks/useComputedFields";
 import type { RestorationModelFormData } from "../schemas";
 import { atLeastOneMethodTabComplete } from "../utils/computations";
 
@@ -40,9 +39,8 @@ export function RestorationForm({ initialData }: Props) {
   const [showWarning, setShowWarning] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Watch all values for computed fields (reactive)
+  // Watch all values to recompute derived UI (e.g., method-completion status)
   const values = watch();
-  const computed = useComputedFields(values);
 
   const methodsComplete = atLeastOneMethodTabComplete(values.methodCosts as any);
 
@@ -109,7 +107,7 @@ export function RestorationForm({ initialData }: Props) {
         <ContextSection />
         <CostEstimatesSection />
         <LaborBreakdownSection />
-        <SummaryValidationSection values={values} computed={computed} />
+        <SummaryValidationSection />
         <CBAResultsSection values={values} />
 
         {/* Action bar */}

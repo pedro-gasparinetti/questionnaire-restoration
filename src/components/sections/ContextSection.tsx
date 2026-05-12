@@ -57,6 +57,8 @@ export function ContextSection() {
   const maintenanceSegments       = (activeEntry?.maintenanceSegments       ?? []) as CostSegment[];
   const ntfpProductivitySegments  = (activeEntry?.ntfpProductivitySegments  ?? []) as ProductivitySegment[];
   const ntfpRevenueSegments       = (activeEntry?.ntfpRevenueSegments       ?? []) as RevenueSegment[];
+  const ntfpDataMode: "production" | "revenue" =
+    (activeEntry?.ntfpDataMode as "production" | "revenue" | undefined) ?? "production";
 
   const implSum  = (Number(implLabor) || 0) + (Number(implMach) || 0) + (Number(implMat) || 0);
   const maintSum = (Number(maintLabor) || 0) + (Number(maintMach) || 0) + (Number(maintMat) || 0);
@@ -415,24 +417,62 @@ export function ContextSection() {
                   Estimate the expected revenue from Non-Timber Forest Products (NTFP) harvested during the maintenance period.
                 </p>
 
-                <div style={{ marginBottom: "1rem" }}>
-                  <h5 style={{ marginBottom: "0.35rem", color: "#92400e", fontSize: "0.9rem" }}>Average NTFP Productivity</h5>
-                  <p className="form-hint" style={{ marginBottom: "0.5rem" }}>
-                    Estimate how NTFP productivity (kg/ha/yr) changes over the maintenance period as the forest matures.
+                {/* ── Data mode selector ─────────────────────── */}
+                <div className="ntfp-data-mode-selector" style={{ marginBottom: "1rem", padding: "0.75rem 1rem", background: "#f5faf6", border: "1px solid #cfe6d6", borderRadius: "6px" }}>
+                  <p style={{ margin: "0 0 0.5rem", fontWeight: 600, fontSize: "0.9rem", color: "#1a7a42" }}>
+                    Which NTFP data will you provide?
                   </p>
-                  <ProductivityTimelineBuilder
-                    key={`prod-${activeTab}`}
-                    startYear={1}
-                    maxYear={20}
-                    value={ntfpProductivitySegments}
-                    onChange={(segments: ProductivitySegment[]) =>
-                      setValue(`methodCosts.${activeTab}.ntfpProductivitySegments`, segments, { shouldDirty: true })
-                    }
-                    onAverageChange={(avg) =>
-                      setValue(`methodCosts.${activeTab}.ntfpProductivity`, avg, { shouldDirty: true })
-                    }
-                  />
+                  <div style={{ display: "flex", gap: "1.5rem", flexWrap: "wrap" }}>
+                    <label style={{ display: "flex", alignItems: "center", gap: "0.4rem", cursor: "pointer" }}>
+                      <input
+                        type="radio"
+                        name={`ntfpDataMode-${activeTab}`}
+                        value="production"
+                        checked={ntfpDataMode === "production"}
+                        onChange={() =>
+                          setValue(`methodCosts.${activeTab}.ntfpDataMode`, "production", { shouldDirty: true })
+                        }
+                      />
+                      <span>Productivity data (kg/ha/yr)</span>
+                    </label>
+                    <label style={{ display: "flex", alignItems: "center", gap: "0.4rem", cursor: "pointer" }}>
+                      <input
+                        type="radio"
+                        name={`ntfpDataMode-${activeTab}`}
+                        value="revenue"
+                        checked={ntfpDataMode === "revenue"}
+                        onChange={() =>
+                          setValue(`methodCosts.${activeTab}.ntfpDataMode`, "revenue", { shouldDirty: true })
+                        }
+                      />
+                      <span>Revenue data (US$/ha/yr)</span>
+                    </label>
+                  </div>
+                  <p style={{ margin: "0.4rem 0 0", fontSize: "0.78rem", color: "#4b6354" }}>
+                    Switching modes keeps the data on both sides — you can toggle freely.
+                  </p>
                 </div>
+
+                {ntfpDataMode === "production" && (
+                  <div style={{ marginBottom: "1rem" }}>
+                    <h5 style={{ marginBottom: "0.35rem", color: "#92400e", fontSize: "0.9rem" }}>Average NTFP Productivity</h5>
+                    <p className="form-hint" style={{ marginBottom: "0.5rem" }}>
+                      Estimate how NTFP productivity (kg/ha/yr) changes over the maintenance period as the forest matures.
+                    </p>
+                    <ProductivityTimelineBuilder
+                      key={`prod-${activeTab}`}
+                      startYear={1}
+                      maxYear={20}
+                      value={ntfpProductivitySegments}
+                      onChange={(segments: ProductivitySegment[]) =>
+                        setValue(`methodCosts.${activeTab}.ntfpProductivitySegments`, segments, { shouldDirty: true })
+                      }
+                      onAverageChange={(avg) =>
+                        setValue(`methodCosts.${activeTab}.ntfpProductivity`, avg, { shouldDirty: true })
+                      }
+                    />
+                  </div>
+                )}
 
                 <div className="form-grid" style={{ maxWidth: "480px", marginBottom: "1rem" }}>
                   <FormField
@@ -449,21 +489,25 @@ export function ContextSection() {
                   />
                 </div>
 
-                <p className="form-hint" style={{ marginTop: "0.5rem" }}>
-                  Add revenue segments for different year ranges. NTFP productivity may vary as the forest matures.
-                </p>
-                <RevenueTimelineBuilder
-                  key={`rev-${activeTab}`}
-                  startYear={1}
-                  maxYear={20}
-                  value={ntfpRevenueSegments}
-                  onChange={(segments: RevenueSegment[]) =>
-                    setValue(`methodCosts.${activeTab}.ntfpRevenueSegments`, segments, { shouldDirty: true })
-                  }
-                  onTotalChange={(total) =>
-                    setValue(`methodCosts.${activeTab}.ntfpRevenue`, total, { shouldDirty: true })
-                  }
-                />
+                {ntfpDataMode === "revenue" && (
+                  <>
+                    <p className="form-hint" style={{ marginTop: "0.5rem" }}>
+                      Add revenue segments for different year ranges. NTFP productivity may vary as the forest matures.
+                    </p>
+                    <RevenueTimelineBuilder
+                      key={`rev-${activeTab}`}
+                      startYear={1}
+                      maxYear={20}
+                      value={ntfpRevenueSegments}
+                      onChange={(segments: RevenueSegment[]) =>
+                        setValue(`methodCosts.${activeTab}.ntfpRevenueSegments`, segments, { shouldDirty: true })
+                      }
+                      onTotalChange={(total) =>
+                        setValue(`methodCosts.${activeTab}.ntfpRevenue`, total, { shouldDirty: true })
+                      }
+                    />
+                  </>
+                )}
               </div>
             </>
           )}
