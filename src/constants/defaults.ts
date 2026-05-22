@@ -203,13 +203,14 @@ export const DEFAULT_FORM_VALUES: RestorationModelFormData = {
     fireRisk: { ...EMPTY_CONTEXT_CONSTRAINT },
     grazingPressure: { ...EMPTY_CONTEXT_CONSTRAINT },
     invasiveSpeciesPressure: { ...EMPTY_CONTEXT_CONSTRAINT },
-    antInfestation: { ...EMPTY_CONTEXT_CONSTRAINT },
+    pestControl: { ...EMPTY_CONTEXT_CONSTRAINT },
   },
   laborBreakdown: {
     implementation: { hiredLabor: 0, familyLabor: 0 },
     maintenance: { hiredLabor: 0, familyLabor: 0 },
     hiredLaborCostPerDay: 0,
     machineryUnitCostPerHour: 0,
+    landLeaseCostPerHaPerYear: 0,
     genderDistribution: { male: 0, female: 0, other: 0 },
   },
 };

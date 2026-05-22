@@ -96,7 +96,7 @@ export function RestorationForm({ initialData }: Props) {
             <ul style={{ margin: "0 0 0.4rem 1.2rem", padding: 0, fontSize: "0.82rem", lineHeight: 1.55, color: "#374151" }}>
               <li style={{ marginBottom: "0.25rem" }}>Percentage distributions that do not sum to 100% in any section</li>
               <li style={{ marginBottom: "0.25rem" }}>Confusion between annual cost and total accumulated cost in the maintenance section</li>
-              <li style={{ marginBottom: "0.25rem" }}>Inclusion of constraint costs (fire, fencing, invasive species, ants) within basic costs — these must appear exclusively in Section 3</li>
+              <li style={{ marginBottom: "0.25rem" }}>Inclusion of constraint costs (fire, fencing, invasive species, pests) within basic costs — these must appear exclusively in Section 3</li>
               <li>Leaving methods incomplete without marking them as having no data at the beginning of Section 2</li>
             </ul>
           </div>

@@ -57,7 +57,7 @@ export function deleteModel(id: string): void {
 // ---------------------------------------------------------------------------
 //
 // Fixed-column structure with one row per answered (non-disabled) method.
-// 230 columns total, ordered to follow the questionnaire flow:
+// 231 columns total, ordered to follow the questionnaire flow:
 //   A. Identification (shared, 7)
 //   D. Method ID (per row, 2)
 //   E. Implementation costs (per row, 4)
@@ -67,7 +67,7 @@ export function deleteModel(id: string): void {
 //   I. NTFP productivity segments (per row, 15 — empty for non-NTFP)
 //   J. NTFP revenue segments (per row, 15 — empty for non-NTFP)
 //   B. Context constraints (shared, 23)
-//   C. Labor breakdown (shared, 9)
+//   C. Labor breakdown (shared, 10)
 //
 // Only fields the user can actually fill in the active questionnaire form are
 // exported. Computed totals (maintenanceCost, ntfpProductivity, ntfpRevenue)
@@ -256,7 +256,7 @@ function blockB_contextConstraints(d: RestorationModel): Row {
   const fire  = d.contextVariables?.fireRisk;
   const fence = d.contextVariables?.grazingPressure;
   const weed  = d.contextVariables?.invasiveSpeciesPressure;
-  const ant   = d.contextVariables?.antInfestation;
+  const pest  = d.contextVariables?.pestControl;
 
   const fireKm   = fire?.cost ?? 0;
   const fireArea = Number(fire?.firebreakArea) || 0;
@@ -288,12 +288,12 @@ function blockB_contextConstraints(d: RestorationModel): Row {
     "Weed_Labor_%":          num(weed?.distribution?.labor),
     "Weed_Mater_%":          num(weed?.distribution?.materials),
     "Weed_Mach_%":           num(weed?.distribution?.machinery),
-    // Ant (5)
-    Ant_UnitCost:            num(ant?.cost),
-    Ant_Occur:               num(ant?.occurrences),
-    "Ant_Labor_%":           num(ant?.distribution?.labor),
-    "Ant_Mater_%":           num(ant?.distribution?.materials),
-    "Ant_Mach_%":            num(ant?.distribution?.machinery),
+    // Pest (5)
+    Pest_UnitCost:           num(pest?.cost),
+    Pest_Occur:              num(pest?.occurrences),
+    "Pest_Labor_%":          num(pest?.distribution?.labor),
+    "Pest_Mater_%":          num(pest?.distribution?.materials),
+    "Pest_Mach_%":           num(pest?.distribution?.machinery),
   };
 }
 
@@ -307,6 +307,7 @@ function blockC_laborBreakdown(d: RestorationModel): Row {
     "Maint_Family_%":         num(lb?.maintenance?.familyLabor),
     HiredLaborCost_USD_day:   num(lb?.hiredLaborCostPerDay),
     MachineryUnitCost_USD_hr: num(lb?.machineryUnitCostPerHour),
+    LandLease_USD_ha_yr:      num(lb?.landLeaseCostPerHaPerYear),
     "Gender_Male_%":          num(lb?.genderDistribution?.male),
     "Gender_Female_%":        num(lb?.genderDistribution?.female),
     "Gender_Other_%":         num(lb?.genderDistribution?.other),
@@ -424,12 +425,12 @@ const METADATA_ROWS: MetaRow[] = [
   ["Weed_Labor_%", "%", "9. Context Constraints", "Share of weed-control cost attributable to labor"],
   ["Weed_Mater_%", "%", "9. Context Constraints", "Share of weed-control cost attributable to materials"],
   ["Weed_Mach_%", "%", "9. Context Constraints", "Share of weed-control cost attributable to machinery/services"],
-  // 9 — Ant
-  ["Ant_UnitCost", "US$/ha", "9. Context Constraints", "Ant infestation control unit cost"],
-  ["Ant_Occur", "count", "9. Context Constraints", "Number of ant-control occurrences over the 20-year horizon"],
-  ["Ant_Labor_%", "%", "9. Context Constraints", "Share of ant-control cost attributable to labor"],
-  ["Ant_Mater_%", "%", "9. Context Constraints", "Share of ant-control cost attributable to materials"],
-  ["Ant_Mach_%", "%", "9. Context Constraints", "Share of ant-control cost attributable to machinery/services"],
+  // 9 — Pest
+  ["Pest_UnitCost", "US$/ha", "9. Context Constraints", "Pest control unit cost"],
+  ["Pest_Occur", "count", "9. Context Constraints", "Number of pest-control occurrences over the 20-year horizon"],
+  ["Pest_Labor_%", "%", "9. Context Constraints", "Share of pest-control cost attributable to labor"],
+  ["Pest_Mater_%", "%", "9. Context Constraints", "Share of pest-control cost attributable to materials"],
+  ["Pest_Mach_%", "%", "9. Context Constraints", "Share of pest-control cost attributable to machinery/services"],
   // 10. Labor breakdown
   ["Impl_Hired_%", "%", "10. Labor Breakdown", "Implementation labor: share of hired (paid) workers (Hired+Family = 100%)"],
   ["Impl_Family_%", "%", "10. Labor Breakdown", "Implementation labor: share of family (unpaid) labor"],
@@ -437,6 +438,7 @@ const METADATA_ROWS: MetaRow[] = [
   ["Maint_Family_%", "%", "10. Labor Breakdown", "Maintenance labor: share of family (unpaid) labor"],
   ["HiredLaborCost_USD_day", "US$/day", "10. Labor Breakdown", "Regional reference: average daily wage for hired field workers"],
   ["MachineryUnitCost_USD_hr", "US$/hour", "10. Labor Breakdown", "Regional reference: hourly cost of machinery"],
+  ["LandLease_USD_ha_yr", "US$/ha/year", "10. Labor Breakdown", "Regional reference: average annual land lease (rent) rate per hectare"],
   ["Gender_Male_%", "%", "10. Labor Breakdown", "Share of total labor hours contributed by male workers (sum to 100% with Female/Other)"],
   ["Gender_Female_%", "%", "10. Labor Breakdown", "Share of total labor hours contributed by female workers"],
   ["Gender_Other_%", "%", "10. Labor Breakdown", "Share of total labor hours contributed by non-binary / other workers"],

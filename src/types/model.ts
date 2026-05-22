@@ -102,8 +102,8 @@ export interface ContextVariables {
   grazingPressure: ContextConstraintEntry;
   /** Weed Control / Invasive Species Pressure */
   invasiveSpeciesPressure: ContextConstraintEntry;
-  /** Ant Control / Ant Infestation Risk */
-  antInfestation: ContextConstraintEntry;
+  /** Pest Control */
+  pestControl: ContextConstraintEntry;
 }
 
 // ---------------------------------------------------------------------------
@@ -255,6 +255,8 @@ export interface LaborBreakdown {
   hiredLaborCostPerDay: number;
   /** Machinery unit cost — regional reference (US$/hour) */
   machineryUnitCostPerHour: number;
+  /** Average land lease rate in the region — regional reference (US$/ha/year) */
+  landLeaseCostPerHaPerYear: number;
   /** Gender distribution of the labor force (must sum to 100%) */
   genderDistribution: GenderDistribution;
 }
