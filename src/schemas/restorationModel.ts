@@ -131,12 +131,12 @@ export const restorationModelSchema = z.object({
   // Section 4: labor breakdown (shared)
   laborBreakdown: z.object({
     implementation: z.object({
-      hiredLabor:  z.number({ message: "Hired Labor % is required" }).min(0, "Cannot be negative").max(100, "Cannot exceed 100%"),
-      familyLabor: z.number({ message: "Family Labor % is required" }).min(0, "Cannot be negative").max(100, "Cannot exceed 100%"),
+      hiredLabor:  z.number({ message: "Hired Labour % is required" }).min(0, "Cannot be negative").max(100, "Cannot exceed 100%"),
+      familyLabor: z.number({ message: "Non Hired Labour % is required" }).min(0, "Cannot be negative").max(100, "Cannot exceed 100%"),
     }),
     maintenance: z.object({
-      hiredLabor:  z.number({ message: "Hired Labor % is required" }).min(0, "Cannot be negative").max(100, "Cannot exceed 100%"),
-      familyLabor: z.number({ message: "Family Labor % is required" }).min(0, "Cannot be negative").max(100, "Cannot exceed 100%"),
+      hiredLabor:  z.number({ message: "Hired Labour % is required" }).min(0, "Cannot be negative").max(100, "Cannot exceed 100%"),
+      familyLabor: z.number({ message: "Non Hired Labour % is required" }).min(0, "Cannot be negative").max(100, "Cannot exceed 100%"),
     }),
     hiredLaborCostPerDay:     z.number({ message: "Hired labor cost is required" }).min(0, "Cannot be negative").default(0),
     machineryUnitCostPerHour: z.number({ message: "Machinery unit cost is required" }).min(0, "Cannot be negative").default(0),

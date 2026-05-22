@@ -181,11 +181,64 @@
   font-size: 0.82rem;
   font-weight: 600;
   color: #333;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
 }
 
 .form-unit {
   font-weight: 400;
   color: #888;
+}
+
+.form-help-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: help;
+  color: #4E8465;
+  margin-left: 0.25rem;
+  transition: color 0.15s;
+  position: relative;
+}
+
+.form-help-icon:hover {
+  color: #16623b;
+}
+
+.form-help-icon:hover::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-bottom: 8px;
+  padding: 0.5rem 0.75rem;
+  background: #1a1a2e;
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 400;
+  line-height: 1.4;
+  border-radius: 6px;
+  white-space: normal;
+  width: max-content;
+  max-width: 250px;
+  z-index: 1000;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  pointer-events: none;
+}
+
+.form-help-icon:hover::before {
+  content: '';
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-bottom: 2px;
+  border: 6px solid transparent;
+  border-top-color: #1a1a2e;
+  z-index: 1000;
+  pointer-events: none;
 }
 
 .form-input {

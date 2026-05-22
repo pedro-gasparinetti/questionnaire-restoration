@@ -247,7 +247,7 @@ function buildCashFlows(
   const fencePerYearMaint = (fenceTotal * 0.3) / Math.max(1, maintYears);
   // Weed: spread evenly over horizon
   const weedPerYear = weedTotal / horizon;
-  // Ant control: spread evenly over horizon
+  // Pest control: spread evenly over horizon
   const antPerYear = antTotal / horizon;
 
   // --- BENEFITS ---
@@ -424,7 +424,7 @@ export function exportCBAToXlsx(data: RestorationModel, filename: string): void 
       (data.contextVariables?.invasiveSpeciesPressure?.cost ?? 0) * (data.contextVariables?.invasiveSpeciesPressure?.occurrences ?? 0),
     ],
     [
-      "Ant Control / Ant Infestation",
+      "Pest Control / Pest Infestation",
       data.contextVariables?.antInfestation?.cost ?? 0,
       data.contextVariables?.antInfestation?.occurrences ?? 0,
       (data.contextVariables?.antInfestation?.cost ?? 0) * (data.contextVariables?.antInfestation?.occurrences ?? 0),
