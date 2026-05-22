@@ -424,7 +424,7 @@ export function exportCBAToXlsx(data: RestorationModel, filename: string): void 
       (data.contextVariables?.invasiveSpeciesPressure?.cost ?? 0) * (data.contextVariables?.invasiveSpeciesPressure?.occurrences ?? 0),
     ],
     [
-      "Pest Control",
+      "Pest Control / Pest Infestation",
       data.contextVariables?.pestControl?.cost ?? 0,
       data.contextVariables?.pestControl?.occurrences ?? 0,
       (data.contextVariables?.pestControl?.cost ?? 0) * (data.contextVariables?.pestControl?.occurrences ?? 0),

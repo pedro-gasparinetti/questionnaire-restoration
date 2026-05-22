@@ -1,7 +1,7 @@
 /**
  * LaborBreakdownSection
  *
- * Captures the breakdown of total labor hours into hired labor vs family labor,
+ * Captures the breakdown of total labor hours into hired labor vs non-hired labor,
  * separately for implementation (Year 1) and maintenance (Years 2–T) phases,
  * plus an overall gender distribution of the workforce.
  *
@@ -37,14 +37,14 @@ export function LaborBreakdownSection() {
   return (
     <CollapsibleSection
       title="4. Labor Breakdown &amp; Machinery"
-      subtitle="Hired Labor vs Family Labor — by phase"
+      subtitle="Hired Labour vs Non Hired Labour — by phase"
       icon={<HardHat size={20} />}
     >
       <p className="form-hint">
         Of the total labor hours involved in the restoration project, what
         percentage corresponds to <strong>hired labor</strong> (paid workers) and
-        what percentage to <strong>family labor</strong> (unpaid household
-        members)?
+        what percentage to <strong>non-hired labour</strong> (includes any type of
+        labour that is not hired, such as family or community labour)?
       </p>
       <p className="form-hint">
         Please provide estimates for each phase. Each row must sum to{" "}
@@ -57,18 +57,18 @@ export function LaborBreakdownSection() {
         <div className="cost-distribution-header">
           <p className="cost-distribution-label">Labor hour distribution</p>
           <DistributionPie slices={[
-            { label: "Hired Labor",  value: Number(implHired)  || 0, color: "#2596be" },
-            { label: "Family Labor", value: Number(implFamily) || 0, color: "#b45309" },
+            { label: "Hired Labour",  value: Number(implHired)  || 0, color: "#2596be" },
+            { label: "Non Hired Labour", value: Number(implFamily) || 0, color: "#b45309" },
           ]} />
         </div>
         {implSum > 0 && Math.abs(implSum - 100) >= 0.01 && (
           <p className="cost-distribution-warning">
-            Hired + Family labor must sum to 100%. Currently: {implSum.toFixed(1)}%.
+            Hired + Non Hired labour must sum to 100%. Currently: {implSum.toFixed(1)}%.
           </p>
         )}
         <div className="form-grid form-grid--2">
           <FormField
-            label="Hired Labor"
+            label="Hired Labour"
             unit="%"
             type="number"
             min="0"
@@ -81,7 +81,7 @@ export function LaborBreakdownSection() {
             error={laborErrors?.implementation?.hiredLabor}
           />
           <FormField
-            label="Family Labor"
+            label="Non Hired Labour"
             unit="%"
             type="number"
             min="0"
@@ -92,6 +92,7 @@ export function LaborBreakdownSection() {
               { valueAsNumber: true }
             )}
             error={laborErrors?.implementation?.familyLabor}
+            helpText="Includes any type of labour that is not hired, such as family or community labour"
           />
         </div>
       </div>
@@ -104,19 +105,19 @@ export function LaborBreakdownSection() {
         <div className="cost-distribution-header">
           <p className="cost-distribution-label">Labor hour distribution</p>
           <DistributionPie slices={[
-            { label: "Hired Labor",  value: Number(maintHired)  || 0, color: "#2596be" },
-            { label: "Family Labor", value: Number(maintFamily) || 0, color: "#b45309" },
+            { label: "Hired Labour",  value: Number(maintHired)  || 0, color: "#2596be" },
+            { label: "Non Hired Labour", value: Number(maintFamily) || 0, color: "#b45309" },
           ]} />
         </div>
         {maintSum > 0 && Math.abs(maintSum - 100) >= 0.01 && (
           <p className="cost-distribution-warning">
-            Hired + Family labor must sum to 100%. Currently:{" "}
+            Hired + Non Hired labour must sum to 100%. Currently:{" "}
             {maintSum.toFixed(1)}%.
           </p>
         )}
         <div className="form-grid form-grid--2">
           <FormField
-            label="Hired Labor"
+            label="Hired Labour"
             unit="%"
             type="number"
             min="0"
@@ -129,7 +130,7 @@ export function LaborBreakdownSection() {
             error={laborErrors?.maintenance?.hiredLabor}
           />
           <FormField
-            label="Family Labor"
+            label="Non Hired Labour"
             unit="%"
             type="number"
             min="0"
@@ -140,6 +141,7 @@ export function LaborBreakdownSection() {
               { valueAsNumber: true }
             )}
             error={laborErrors?.maintenance?.familyLabor}
+            helpText="Includes any type of labour that is not hired, such as family or community labour"
           />
         </div>
       </div>

@@ -102,7 +102,7 @@ export interface ContextVariables {
   grazingPressure: ContextConstraintEntry;
   /** Weed Control / Invasive Species Pressure */
   invasiveSpeciesPressure: ContextConstraintEntry;
-  /** Pest Control */
+  /** Pest Control / Pest Infestation Risk */
   pestControl: ContextConstraintEntry;
 }
 
@@ -226,7 +226,7 @@ export interface RestorationModel {
   contextVariables: ContextVariables;
 
   // ---- Labor Breakdown ----
-  /** Breakdown of labor hours into hired vs family labor (must sum to 100% each) */
+  /** Breakdown of labor hours into hired vs non-hired labor (must sum to 100% each) */
   laborBreakdown: LaborBreakdown;
 }
 
@@ -236,7 +236,7 @@ export interface RestorationModel {
 
 /**
  * Captures what proportion of total labor hours corresponds to hired labor
- * versus family labor, separately for implementation and maintenance phases.
+ * versus non-hired labor, separately for implementation and maintenance phases.
  * Each phase's hiredLabor + familyLabor must sum to 100%.
  */
 export interface LaborPhaseBreakdown {
@@ -247,9 +247,9 @@ export interface LaborPhaseBreakdown {
 }
 
 export interface LaborBreakdown {
-  /** Hired vs family labor split for implementation phase (Year 1) */
+  /** Hired vs non-hired labor split for implementation phase (Year 1) */
   implementation: LaborPhaseBreakdown;
-  /** Hired vs family labor split for maintenance phase (Years 2–T) */
+  /** Hired vs non-hired labor split for maintenance phase (Years 2–T) */
   maintenance: LaborPhaseBreakdown;
   /** Hired labor daily rate — regional reference (US$/day) */
   hiredLaborCostPerDay: number;

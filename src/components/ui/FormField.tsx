@@ -5,6 +5,7 @@
  */
 
 import type { FieldError, UseFormRegisterReturn } from "react-hook-form";
+import { HelpCircle } from "lucide-react";
 
 // ---------------------------------------------------------------------------
 // Text / Number Input
@@ -21,6 +22,7 @@ interface FormFieldProps {
   min?: string;
   max?: string;
   disabled?: boolean;
+  helpText?: string;
 }
 
 export function FormField({
@@ -34,12 +36,18 @@ export function FormField({
   min,
   max,
   disabled = false,
+  helpText,
 }: FormFieldProps) {
   return (
     <div className="form-field">
       <label className="form-label">
         {label}
         {unit && <span className="form-unit"> ({unit})</span>}
+        {helpText && (
+          <span className="form-help-icon" data-tooltip={helpText}>
+            <HelpCircle size={14} />
+          </span>
+        )}
       </label>
       <input
         className={`form-input ${error ? "form-input--error" : ""}`}
