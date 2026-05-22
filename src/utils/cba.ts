@@ -238,7 +238,7 @@ function buildCashFlows(
   const fireTotal = (ctx?.fireRisk?.cost || 0) * (ctx?.fireRisk?.occurrences || 0);
   const fenceTotal = (ctx?.grazingPressure?.cost || 0) * (ctx?.grazingPressure?.occurrences || 0);
   const weedTotal = (ctx?.invasiveSpeciesPressure?.cost || 0) * (ctx?.invasiveSpeciesPressure?.occurrences || 0);
-  const antTotal = (ctx?.antInfestation?.cost || 0) * (ctx?.antInfestation?.occurrences || 0);
+  const pestTotal = (ctx?.pestControl?.cost || 0) * (ctx?.pestControl?.occurrences || 0);
 
   // Fire: spread evenly over horizon
   const firePerYear = fireTotal / horizon;
@@ -248,7 +248,7 @@ function buildCashFlows(
   // Weed: spread evenly over horizon
   const weedPerYear = weedTotal / horizon;
   // Pest control: spread evenly over horizon
-  const antPerYear = antTotal / horizon;
+  const pestPerYear = pestTotal / horizon;
 
   // --- BENEFITS ---
   const isNtfp = methodId.endsWith("_ntfp");
@@ -265,7 +265,7 @@ function buildCashFlows(
     const maintCost = t > 0 ? maintenanceByYear[yearNumber] || 0 : 0;
 
     const constraintCost =
-      (isImpl ? fenceYear0 : fencePerYearMaint) + firePerYear + weedPerYear + antPerYear;
+      (isImpl ? fenceYear0 : fencePerYearMaint) + firePerYear + weedPerYear + pestPerYear;
 
     const totalCost = implCost + maintCost + constraintCost;
 
@@ -425,9 +425,9 @@ export function exportCBAToXlsx(data: RestorationModel, filename: string): void 
     ],
     [
       "Pest Control / Pest Infestation",
-      data.contextVariables?.antInfestation?.cost ?? 0,
-      data.contextVariables?.antInfestation?.occurrences ?? 0,
-      (data.contextVariables?.antInfestation?.cost ?? 0) * (data.contextVariables?.antInfestation?.occurrences ?? 0),
+      data.contextVariables?.pestControl?.cost ?? 0,
+      data.contextVariables?.pestControl?.occurrences ?? 0,
+      (data.contextVariables?.pestControl?.cost ?? 0) * (data.contextVariables?.pestControl?.occurrences ?? 0),
     ],
   ];
   const wsParams = XLSX.utils.aoa_to_sheet(paramRows);

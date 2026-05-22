@@ -16,7 +16,7 @@ const CONTEXT_CONSTRAINTS = [
   { key: "fireRisk" as const, label: "Firebreak / Fire Risk", unit: "US$/km" },
   { key: "grazingPressure" as const, label: "Fencing / Grazing Pressure", unit: "US$/km" },
   { key: "invasiveSpeciesPressure" as const, label: "Weed Control / Invasive Species Pressure", unit: "US$/ha" },
-  { key: "antInfestation" as const, label: "Pest Control / Pest Infestation Risk", unit: "US$/ha" },
+  { key: "pestControl" as const, label: "Pest Control / Pest Infestation Risk", unit: "US$/ha" },
 ];
 
 /** Convert US$/ha to US$/km assuming a square property of a given area. */

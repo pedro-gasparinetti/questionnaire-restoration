@@ -16,7 +16,6 @@ export function IdentificationSection() {
   const {
     register,
     setValue,
-    watch,
     formState: { errors },
   } = useFormContext<RestorationModelFormData>();
 

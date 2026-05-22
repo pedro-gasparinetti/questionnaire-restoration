@@ -31,7 +31,7 @@ const CONSTRAINT_META: Record<string, { label: string; unit: string }> = {
   fireRisk:                  { label: "Firebreak / Fire Risk",                    unit: "US$/ha" },
   grazingPressure:           { label: "Fencing / Grazing Pressure",               unit: "US$/km" },
   invasiveSpeciesPressure:   { label: "Weed Control / Invasive Species Pressure", unit: "US$/ha" },
-  antInfestation:            { label: "Pest Control / Pest Infestation Risk",       unit: "US$/ha" },
+  pestControl:               { label: "Pest Control / Pest Infestation Risk",      unit: "US$/ha" },
 };
 
 // ---------------------------------------------------------------------------
@@ -125,7 +125,7 @@ export function SummaryValidationSection() {
       const maintDist: FactorShares = entry.maintenanceDistribution ?? { labor: 0, materials: 0, machinery: 0 };
 
       // Context constraints
-      const constraintKeys = ["fireRisk", "grazingPressure", "invasiveSpeciesPressure", "antInfestation"] as const;
+      const constraintKeys = ["fireRisk", "grazingPressure", "invasiveSpeciesPressure", "pestControl"] as const;
       const constraints = constraintKeys.map((k) => {
         const c: ContextConstraintEntry = (ctx as any)[k] ?? {
           cost: 0,

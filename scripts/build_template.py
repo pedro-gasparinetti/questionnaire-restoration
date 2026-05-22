@@ -47,10 +47,10 @@ cols += [
     "Fence_Labor_%", "Fence_Mater_%", "Fence_Mach_%",
 ]
 cols += ["Weed_UnitCost", "Weed_Occur", "Weed_Labor_%", "Weed_Mater_%", "Weed_Mach_%"]
-cols += ["Ant_UnitCost", "Ant_Occur", "Ant_Labor_%", "Ant_Mater_%", "Ant_Mach_%"]
+cols += ["Pest_UnitCost", "Pest_Occur", "Pest_Labor_%", "Pest_Mater_%", "Pest_Mach_%"]
 # C. Labor breakdown
 cols += ["Impl_Hired_%", "Impl_Family_%", "Maint_Hired_%", "Maint_Family_%"]
-cols += ["HiredLaborCost_USD_day", "MachineryUnitCost_USD_hr"]
+cols += ["HiredLaborCost_USD_day", "MachineryUnitCost_USD_hr", "LandLease_USD_ha_yr"]
 cols += ["Gender_Male_%", "Gender_Female_%", "Gender_Other_%"]
 
 header_font = Font(bold=True, color="FFFFFF", name="Arial")
@@ -157,12 +157,12 @@ meta = [
     ("Weed_Labor_%", "%", "9. Context Constraints", "Share of weed-control cost attributable to labor"),
     ("Weed_Mater_%", "%", "9. Context Constraints", "Share of weed-control cost attributable to materials"),
     ("Weed_Mach_%", "%", "9. Context Constraints", "Share of weed-control cost attributable to machinery/services"),
-    # B - Ant
-    ("Ant_UnitCost", "US$/ha", "9. Context Constraints", "Ant infestation control unit cost"),
-    ("Ant_Occur", "count", "9. Context Constraints", "Number of ant-control occurrences over the 20-year horizon"),
-    ("Ant_Labor_%", "%", "9. Context Constraints", "Share of ant-control cost attributable to labor"),
-    ("Ant_Mater_%", "%", "9. Context Constraints", "Share of ant-control cost attributable to materials"),
-    ("Ant_Mach_%", "%", "9. Context Constraints", "Share of ant-control cost attributable to machinery/services"),
+    # B - Pest
+    ("Pest_UnitCost", "US$/ha", "9. Context Constraints", "Pest control unit cost"),
+    ("Pest_Occur", "count", "9. Context Constraints", "Number of pest-control occurrences over the 20-year horizon"),
+    ("Pest_Labor_%", "%", "9. Context Constraints", "Share of pest-control cost attributable to labor"),
+    ("Pest_Mater_%", "%", "9. Context Constraints", "Share of pest-control cost attributable to materials"),
+    ("Pest_Mach_%", "%", "9. Context Constraints", "Share of pest-control cost attributable to machinery/services"),
     # C. Labor breakdown
     ("Impl_Hired_%", "%", "10. Labor Breakdown", "Implementation labor: share of hired (paid) workers (Hired+Family = 100%)"),
     ("Impl_Family_%", "%", "10. Labor Breakdown", "Implementation labor: share of family (unpaid) labor"),
@@ -170,6 +170,7 @@ meta = [
     ("Maint_Family_%", "%", "10. Labor Breakdown", "Maintenance labor: share of family (unpaid) labor"),
     ("HiredLaborCost_USD_day", "US$/day", "10. Labor Breakdown", "Regional reference: average daily wage for hired field workers"),
     ("MachineryUnitCost_USD_hr", "US$/hour", "10. Labor Breakdown", "Regional reference: hourly cost of machinery"),
+    ("LandLease_USD_ha_yr", "US$/ha/year", "10. Labor Breakdown", "Regional reference: average annual land lease (rent) rate per hectare"),
     ("Gender_Male_%", "%", "10. Labor Breakdown", "Share of total labor hours contributed by male workers (sum to 100% with Female/Other)"),
     ("Gender_Female_%", "%", "10. Labor Breakdown", "Share of total labor hours contributed by female workers"),
     ("Gender_Other_%", "%", "10. Labor Breakdown", "Share of total labor hours contributed by non-binary / other workers"),
@@ -201,6 +202,6 @@ mws.freeze_panes = "A2"
 print(f"Data sheet: {len(cols)} columns")
 print(f"Metadata sheet: {len(meta)} rows")
 
-out = r"C:\Users\maria\OneDrive\Documentos\Trabalho\Consultorias\CSF\2025\CI - Calculadora\Questionnaires\export_template_v3.xlsx"
+out = r"C:\Users\maria\OneDrive\Documentos\Trabalho\Consultorias\CSF\2025\CI - Calculadora\Questionnaires\export_template_v4.xlsx"
 wb.save(out)
 print(f"Saved to: {out}")

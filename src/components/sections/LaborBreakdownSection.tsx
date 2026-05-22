@@ -247,6 +247,27 @@ export function LaborBreakdownSection() {
           Average daily wage for hired field workers and hourly cost of machinery in this region.
         </p>
       </div>
+
+      {/* Land Lease Reference */}
+      <div className="labor-rate-box" style={{ marginTop: "1.5rem" }}>
+        <h5 className="labor-rate-title">Land Lease Reference</h5>
+        <div style={{ maxWidth: "280px" }}>
+          <FormField
+            label="Average Land Lease Cost"
+            unit="US$/ha/year"
+            type="number"
+            min="0"
+            step="0.01"
+            registration={register("laborBreakdown.landLeaseCostPerHaPerYear", {
+              valueAsNumber: true,
+            })}
+            error={laborErrors?.landLeaseCostPerHaPerYear}
+          />
+        </div>
+        <p className="labor-rate-hint">
+          Average annual cost to lease (rent) one hectare of land in this region.
+        </p>
+      </div>
     </CollapsibleSection>
   );
 }
