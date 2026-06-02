@@ -108,12 +108,36 @@ meta = [
     ("Impl_Labor_%", "%", "3. Implementation", "Share of implementation cost attributable to labor (must sum to 100% with Mater/Mach)"),
     ("Impl_Mater_%", "%", "3. Implementation", "Share of implementation cost attributable to materials"),
     ("Impl_Mach_%", "%", "3. Implementation", "Share of implementation cost attributable to machinery/services"),
-    # G. Maint segments
+    # G. Maint segments — one row per activity
     (
-        "Maint_<Activity>_Seg<N>_<Field>",
+        "Maint_RegInd_Seg<N>_<Field>",
         "year (From/To) or US$/ha/yr (Annual_USD)",
         "4. Maintenance segments",
-        "Maintenance segment data grouped by activity. <Activity> in {RegInd = Maintenance of regenerating individuals; MaintNTFP = Maintenance of NTFP species; Harvest; TechAssist = Technical assistance; Monitoring = Monitoring General Maintenance Activities}. <N> in 1..10. <Field> in {From_yr (start year of segment), To_yr (end year, >= From_yr), Annual_USD (annual cost in US$/ha)}. Empty when the user has not used that activity/segment slot.",
+        "Segments for 'Maintenance of regenerating individuals' (pruning, thinning, support staking). <N> in 1..10. <Field> in {From_yr (start year), To_yr (end year, >= From_yr), Annual_USD (annual cost in US$/ha)}. Empty when the user has not used that segment slot.",
+    ),
+    (
+        "Maint_MaintNTFP_Seg<N>_<Field>",
+        "year (From/To) or US$/ha/yr (Annual_USD)",
+        "4. Maintenance segments",
+        "Segments for 'Maintenance of NTFP species' (pruning, thinning, support staking). <N> in 1..10. <Field> in {From_yr, To_yr, Annual_USD}. Empty when the slot was not used.",
+    ),
+    (
+        "Maint_Harvest_Seg<N>_<Field>",
+        "year (From/To) or US$/ha/yr (Annual_USD)",
+        "4. Maintenance segments",
+        "Segments for 'Harvest' activity (e.g. NTFP collection, when treated as a maintenance cost). <N> in 1..10. <Field> in {From_yr, To_yr, Annual_USD}. Empty when the slot was not used.",
+    ),
+    (
+        "Maint_TechAssist_Seg<N>_<Field>",
+        "year (From/To) or US$/ha/yr (Annual_USD)",
+        "4. Maintenance segments",
+        "Segments for 'Technical assistance' (agronomist/forester visits, planning, training). <N> in 1..10. <Field> in {From_yr, To_yr, Annual_USD}. Empty when the slot was not used.",
+    ),
+    (
+        "Maint_Monitoring_Seg<N>_<Field>",
+        "year (From/To) or US$/ha/yr (Annual_USD)",
+        "4. Maintenance segments",
+        "Segments for 'Monitoring General Maintenance Activities' (e.g. shade management, light interventions). <N> in 1..10. <Field> in {From_yr, To_yr, Annual_USD}. Empty when the slot was not used.",
     ),
     # F. Maint distribution
     ("Maint_Labor_%", "%", "5. Maintenance distribution", "Share of maintenance cost attributable to labor (sum to 100%)"),
@@ -202,6 +226,6 @@ mws.freeze_panes = "A2"
 print(f"Data sheet: {len(cols)} columns")
 print(f"Metadata sheet: {len(meta)} rows")
 
-out = r"C:\Users\maria\OneDrive\Documentos\Trabalho\Consultorias\CSF\2025\CI - Calculadora\Questionnaires\export_template_v4.xlsx"
+out = r"C:\Users\maria\OneDrive\Documentos\Trabalho\Consultorias\CSF\2025\CI - Calculadora\Questionnaires\export_template_v5.xlsx"
 wb.save(out)
 print(f"Saved to: {out}")
