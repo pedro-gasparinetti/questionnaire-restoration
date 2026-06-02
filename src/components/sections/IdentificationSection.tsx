@@ -5,7 +5,7 @@
  * and time horizon for this model specification.
  */
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useFormContext } from "react-hook-form";
 import type { RestorationModelFormData } from "../../schemas";
 import { CollapsibleSection, FormField, FormSelect } from "../ui";
@@ -22,8 +22,31 @@ export function IdentificationSection() {
   const [gpsStatus, setGpsStatus] = useState<"idle" | "loading" | "error" | "denied">("idle");
   const [latitude, setLatitude] = useState("");
   const [longitude, setLongitude] = useState("");
+  const [gpsMenuOpen, setGpsMenuOpen] = useState(false);
+  const latInputRef = useRef<HTMLInputElement>(null);
+  const gpsMenuRef = useRef<HTMLDivElement>(null);
 
-  const handleGetGps = () => {
+  // Close the GPS menu on outside click / Escape key
+  useEffect(() => {
+    if (!gpsMenuOpen) return;
+    const onClickOutside = (e: MouseEvent) => {
+      if (gpsMenuRef.current && !gpsMenuRef.current.contains(e.target as Node)) {
+        setGpsMenuOpen(false);
+      }
+    };
+    const onEsc = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setGpsMenuOpen(false);
+    };
+    document.addEventListener("mousedown", onClickOutside);
+    document.addEventListener("keydown", onEsc);
+    return () => {
+      document.removeEventListener("mousedown", onClickOutside);
+      document.removeEventListener("keydown", onEsc);
+    };
+  }, [gpsMenuOpen]);
+
+  const handleAutoDetect = () => {
+    setGpsMenuOpen(false);
     if (!navigator.geolocation) {
       setGpsStatus("error");
       return;
@@ -46,6 +69,13 @@ export function IdentificationSection() {
         setGpsStatus(err.code === 1 ? "denied" : "error");
       }
     );
+  };
+
+  const handleEnterManually = () => {
+    setGpsMenuOpen(false);
+    setGpsStatus("idle");
+    // Give the menu a tick to close before focusing the input
+    setTimeout(() => latInputRef.current?.focus(), 0);
   };
 
   const handleLatLonChange = (lat: string, lon: string) => {
@@ -83,6 +113,7 @@ export function IdentificationSection() {
             <div style={{ flex: 1, display: "flex", gap: "0.5rem" }}>
               <div style={{ flex: 1 }}>
                 <input
+                  ref={latInputRef}
                   className="form-input"
                   type="number"
                   step="any"
@@ -110,15 +141,77 @@ export function IdentificationSection() {
                 <p className="form-hint" style={{ marginTop: "0.25rem", fontSize: "0.75rem", marginBottom: 0 }}>Longitude (X)</p>
               </div>
             </div>
-            <button
-              type="button"
-              className="btn btn--secondary"
-              onClick={handleGetGps}
-              disabled={gpsStatus === "loading"}
-              style={{ whiteSpace: "nowrap", flexShrink: 0 }}
-            >
-              {gpsStatus === "loading" ? "Locating…" : "📍 Get GPS"}
-            </button>
+            <div ref={gpsMenuRef} style={{ position: "relative", flexShrink: 0 }}>
+              <button
+                type="button"
+                className="btn btn--secondary"
+                onClick={() => setGpsMenuOpen((open) => !open)}
+                disabled={gpsStatus === "loading"}
+                aria-haspopup="menu"
+                aria-expanded={gpsMenuOpen}
+                style={{ whiteSpace: "nowrap" }}
+              >
+                {gpsStatus === "loading" ? "Locating…" : "📍 Set GPS ▾"}
+              </button>
+              {gpsMenuOpen && (
+                <div
+                  role="menu"
+                  style={{
+                    position: "absolute",
+                    top: "calc(100% + 4px)",
+                    right: 0,
+                    minWidth: "220px",
+                    background: "#fff",
+                    border: "1px solid #d1d5db",
+                    borderRadius: "6px",
+                    boxShadow: "0 4px 12px rgba(0,0,0,0.10)",
+                    padding: "0.35rem",
+                    zIndex: 20,
+                  }}
+                >
+                  <button
+                    type="button"
+                    role="menuitem"
+                    onClick={handleAutoDetect}
+                    style={{
+                      display: "block",
+                      width: "100%",
+                      textAlign: "left",
+                      padding: "0.5rem 0.75rem",
+                      background: "transparent",
+                      border: "none",
+                      borderRadius: "4px",
+                      cursor: "pointer",
+                      fontSize: "0.88rem",
+                    }}
+                    onMouseEnter={(e) => (e.currentTarget.style.background = "#f3f4f6")}
+                    onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+                  >
+                    📡 Auto-detect from browser
+                  </button>
+                  <button
+                    type="button"
+                    role="menuitem"
+                    onClick={handleEnterManually}
+                    style={{
+                      display: "block",
+                      width: "100%",
+                      textAlign: "left",
+                      padding: "0.5rem 0.75rem",
+                      background: "transparent",
+                      border: "none",
+                      borderRadius: "4px",
+                      cursor: "pointer",
+                      fontSize: "0.88rem",
+                    }}
+                    onMouseEnter={(e) => (e.currentTarget.style.background = "#f3f4f6")}
+                    onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+                  >
+                    ✏️ Enter manually
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
           <input type="hidden" {...register("gpsCoordinates")} />
           {gpsStatus === "denied" && (
@@ -128,7 +221,7 @@ export function IdentificationSection() {
             <p className="form-error">Unable to retrieve GPS coordinates.</p>
           )}
           <p className="form-hint" style={{ marginTop: "0.5rem", fontSize: "0.82rem" }}>
-            Click "Get GPS" to auto-fill from your browser, or type the coordinates manually.
+            Click "Set GPS" to choose between auto-detecting from your browser or entering coordinates manually.
           </p>
         </div>
 
